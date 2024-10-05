@@ -32,7 +32,7 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "light" ? DarkTheme : DefaultTheme}>
-      <Stack>
+      <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(account)/index" />
         <Stack.Screen name="(goal)/index" />
       </Stack>

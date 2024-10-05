@@ -1,4 +1,5 @@
 import AccountHeader from "@/components/AccountHeader";
+import BackgroundImage from "@/components/BacgkroundImage";
 import CardView from "@/components/CardView";
 import ListComponent from "@/components/ListComponent";
 import BackgroundSVG from "@/components/svg/BackgroundSVG";
@@ -17,22 +18,7 @@ export default function Home() {
 
   return (
     <View>
-      <ImageBackground
-        style={{
-          height: "100%",
-          width: "100%",
-          flex: 1,
-          position: "absolute",
-        }}
-      >
-        {/* <BlurView
-          intensity={50}
-          style={{ position: "absolute", height: "100%", width: "100%" }}
-          tint="systemChromeMaterial"
-        > */}
-        <BackgroundSVG />
-        {/* </BlurView> */}
-      </ImageBackground>
+      <BackgroundImage />
       <SafeAreaView edges={["top"]}>
         <CardView
           topNavigationHeader="Account"

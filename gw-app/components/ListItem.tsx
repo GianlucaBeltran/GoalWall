@@ -22,7 +22,7 @@ export default function ListItem({ item }: { item: ListItemProps }) {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    paddingTop: 0,
+    // paddingTop: 0,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
