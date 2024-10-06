@@ -1,13 +1,11 @@
 import BackgroundImage from "@/components/BacgkroundImage";
 import ChevronLeftSVG from "@/components/svg/ChevronLeftSVG";
 import { useNavigation } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  Animated,
-  Easing,
   KeyboardAvoidingView,
   Platform,
   TextInput,
@@ -18,14 +16,20 @@ import { TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import Svg, {
-  Defs,
   G,
-  Path,
   TextPath,
   TSpan,
   Text as TextSVG,
   Circle,
 } from "react-native-svg";
+import AnimatedView, {
+  withSpring,
+  useSharedValue,
+  withTiming,
+  Easing,
+  runOnJS,
+  AnimationCallback,
+} from "react-native-reanimated";
 
 interface Goal {
   uid: number;
@@ -34,16 +38,27 @@ interface Goal {
   date: string;
 }
 
+interface AnimState {
+  started: boolean;
+  inProgress: boolean;
+  ended: boolean;
+}
+
 export default function Goal() {
   const [goal, setGoal] = useState<Goal | undefined>();
   const [isEditing, setIsEditing] = useState(false);
   const [goalInput, setGoalInput] = useState("");
-  const [showDate, setShowDate] = useState(false);
-
+  const [animState, setAnimState] = useState<AnimState>({
+    started: false,
+    inProgress: false,
+    ended: false,
+  });
   const navigation = useNavigation();
 
-  const circleAnim = useRef(new Animated.Value(340)).current;
-  const goalTextAnim = useRef(new Animated.Value(1)).current;
+  const circleAnim = useSharedValue(340);
+  const goalTextAnim = useSharedValue(1);
+  const buttonAnim = useSharedValue(200);
+  const buttonAnimOpacity = useSharedValue(1);
 
   useEffect(() => {
     if (!goal?.description) return;
@@ -57,6 +72,96 @@ export default function Goal() {
     }
 
     return reversedString.join("");
+  }
+
+  function expandCircle() {
+    circleAnim.value = withTiming(20, {
+      duration: 2000,
+      easing: Easing.out(Easing.poly(3)),
+    });
+    goalTextAnim.value = withTiming(0, { duration: 2000 }, (finished) => {
+      runOnJS(setIsEditing)(true);
+      runOnJS(expandButton)();
+      runOnJS(endAnimState)();
+    });
+  }
+
+  function shrinkCircle() {
+    circleAnim.value = withTiming(320, {
+      duration: 2000,
+      easing: Easing.in(Easing.linear),
+    });
+    goalTextAnim.value = withTiming(1, { duration: 2000 }, (finished) => {
+      runOnJS(expandButton)();
+      runOnJS(endAnimState)();
+    });
+  }
+
+  function shrinkButton(
+    buttonCallBack?: AnimationCallback,
+    textCallBack?: AnimationCallback
+  ) {
+    buttonAnim.value = withTiming(
+      0,
+      {
+        duration: 500,
+      },
+      buttonCallBack
+    );
+    buttonAnimOpacity.value = withTiming(
+      0,
+      {
+        duration: 200,
+      },
+      textCallBack
+    );
+  }
+  function expandButton(
+    buttonCallBack?: AnimationCallback,
+    textCallBack?: AnimationCallback
+  ) {
+    buttonAnim.value = withSpring(
+      200,
+      {
+        duration: 2000,
+      },
+      buttonCallBack
+    );
+    buttonAnimOpacity.value = withTiming(
+      1,
+      {
+        duration: 200,
+      },
+      textCallBack
+    );
+  }
+
+  function startAnimState() {
+    setAnimState({ started: true, inProgress: true, ended: false });
+  }
+
+  function endAnimState() {
+    setAnimState({ started: true, inProgress: false, ended: true });
+  }
+
+  async function submitGoal() {
+    setGoal({
+      uid: 1,
+      description: goalInput,
+      date: new Date().toDateString(),
+    });
+
+    try {
+      const response = await fetch("192.168.0.218/");
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+
+      const json = await response.json();
+      console.log(json);
+    } catch (error: any) {
+      console.error(error.message);
+    }
   }
 
   return (
@@ -98,7 +203,7 @@ export default function Goal() {
             style={{ position: "absolute", height: "100%", width: "100%" }}
             tint="systemChromeMaterial"
           > */}
-              <Animated.View
+              <AnimatedView.View
                 style={[
                   styles.goalCircle,
                   {
@@ -112,7 +217,7 @@ export default function Goal() {
               >
                 {!isEditing && goal && (
                   <>
-                    {showDate && (
+                    {animState.ended && (
                       <Svg
                         height="100%"
                         width="100%"
@@ -128,6 +233,13 @@ export default function Goal() {
                             stroke="none"
                           />
                         </G>
+                        <TextSVG fill="black" fontSize="32" fontWeight={700}>
+                          <TextPath href="#circle" startOffset={716}>
+                            <TSpan rotate={0} y={20}>
+                              Goal
+                            </TSpan>
+                          </TextPath>
+                        </TextSVG>
                         <TextSVG fill="grey" fontSize="10">
                           <TextPath href="#circle" startOffset={210}>
                             <TSpan rotate={180}>
@@ -137,14 +249,14 @@ export default function Goal() {
                         </TextSVG>
                       </Svg>
                     )}
-                    <Animated.View style={{ opacity: goalTextAnim }}>
+                    <AnimatedView.View style={{ opacity: goalTextAnim }}>
                       <Text>{goal.title}</Text>
                       <Text>{goal.description}</Text>
-                    </Animated.View>
+                    </AnimatedView.View>
                   </>
                 )}
                 {!isEditing && !goal && (
-                  <Animated.View
+                  <AnimatedView.View
                     style={{
                       opacity: goalTextAnim,
                     }}
@@ -152,7 +264,7 @@ export default function Goal() {
                     <Text style={{ fontSize: 32, textAlign: "center" }}>
                       Set a goal and share it on the wall!
                     </Text>
-                  </Animated.View>
+                  </AnimatedView.View>
                 )}
                 {isEditing && (
                   <>
@@ -166,10 +278,9 @@ export default function Goal() {
                     />
                   </>
                 )}
-              </Animated.View>
+              </AnimatedView.View>
               {/* </BlurView> */}
             </View>
-            {/* <Button title="Edit" /> */}
             <View
               style={{
                 flex: 0.5,
@@ -177,58 +288,58 @@ export default function Goal() {
                 alignItems: "center",
               }}
             >
-              <TouchableOpacity
-                style={{ opacity: isEditing && !goalInput ? 0.2 : 1 }}
-                onPress={() => {
-                  if (!isEditing) {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    setShowDate(false);
-                    Animated.timing(circleAnim, {
-                      toValue: 20,
-                      duration: 2000,
-                      easing: Easing.out(Easing.circle),
-                      useNativeDriver: true,
-                    }).start();
-                    Animated.timing(goalTextAnim, {
-                      toValue: 0,
-                      duration: 2000,
-                      useNativeDriver: true,
-                    }).start((result) => {
-                      setIsEditing(true);
-                    });
-                  } else {
-                    if (!goalInput) return;
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    setGoal({
-                      uid: 1,
-                      description: goalInput,
-                      date: new Date().toDateString(),
-                    });
-                    setIsEditing(false);
-                    if (Keyboard.isVisible()) {
-                      Keyboard.dismiss();
-                    }
-                    Animated.timing(circleAnim, {
-                      toValue: 340,
-                      duration: 2000,
-                      useNativeDriver: true,
-                    }).start();
-                    Animated.timing(goalTextAnim, {
-                      toValue: 1,
-                      duration: 2000,
-                      useNativeDriver: true,
-                    }).start((result) => setShowDate(true));
-                  }
+              <AnimatedView.View
+                style={{
+                  width: buttonAnim,
+                  opacity: isEditing && !goalInput ? 0.2 : 1,
+                  height: 50,
                 }}
               >
-                <View style={styles.goalButton}>
-                  <Text style={{ fontWeight: 600 }}>
-                    {!isEditing && goal && "Edit"}
-                    {!isEditing && !goal && "Set a goal!"}
-                    {isEditing && "Submit"}
-                  </Text>
-                </View>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: "white",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    borderRadius: 20,
+                  }}
+                  disabled={(isEditing && !goalInput) || animState.inProgress}
+                  onPress={() => {
+                    if (!isEditing) {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      startAnimState();
+                      shrinkButton();
+                      expandCircle();
+                    } else {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      startAnimState();
+                      setIsEditing(false);
+
+                      submitGoal();
+
+                      if (Keyboard.isVisible()) {
+                        Keyboard.dismiss();
+                      }
+                      shrinkCircle();
+                      shrinkButton();
+                    }
+                  }}
+                >
+                  <AnimatedView.View
+                    style={{
+                      opacity:
+                        isEditing && !goalInput ? 0.2 : buttonAnimOpacity,
+                    }}
+                  >
+                    <Text style={{ fontWeight: 600 }}>
+                      {!isEditing && goal && "Edit"}
+                      {!isEditing && !goal && "Set a goal"}
+                      {isEditing && "Submit"}
+                    </Text>
+                  </AnimatedView.View>
+                </TouchableOpacity>
+              </AnimatedView.View>
             </View>
           </KeyboardAvoidingView>
         </SafeAreaView>
