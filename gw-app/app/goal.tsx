@@ -1,4 +1,3 @@
-import BackgroundImage from "@/components/BacgkroundImage";
 import ChevronLeftSVG from "@/components/svg/ChevronLeftSVG";
 import { useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
@@ -11,6 +10,7 @@ import {
   TextInput,
   Keyboard,
   TouchableWithoutFeedback,
+  ImageBackground,
 } from "react-native";
 import { TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -145,18 +145,26 @@ export default function Goal() {
   }
 
   async function submitGoal() {
+    console.log("test");
     setGoal({
       uid: 1,
       description: goalInput,
       date: new Date().toDateString(),
     });
-
+    const url = "http://192.168.0.249:3000/goal";
     try {
-      const response = await fetch("192.168.0.218/");
+      const response = await fetch(url, {
+        method: "POST",
+        body: JSON.stringify({ message: goalInput }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
       }
 
+      console.log("beforeJson");
       const json = await response.json();
       console.log(json);
     } catch (error: any) {
@@ -173,8 +181,11 @@ export default function Goal() {
         }
       }}
     >
-      <View style={{ flex: 1 }}>
-        <BackgroundImage />
+      <ImageBackground
+        source={require("../assets/images/background.png")}
+        resizeMode="cover"
+        style={{ flex: 1, justifyContent: "center" }}
+      >
         <SafeAreaView style={{ flex: 1 }}>
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -307,6 +318,7 @@ export default function Goal() {
                   disabled={(isEditing && !goalInput) || animState.inProgress}
                   onPress={() => {
                     if (!isEditing) {
+                      console.log(isEditing);
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                       startAnimState();
                       shrinkButton();
@@ -343,7 +355,7 @@ export default function Goal() {
             </View>
           </KeyboardAvoidingView>
         </SafeAreaView>
-      </View>
+      </ImageBackground>
     </TouchableWithoutFeedback>
   );
 }

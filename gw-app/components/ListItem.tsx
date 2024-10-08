@@ -3,7 +3,13 @@ import { ListItemProps } from "./ListComponent";
 import ChevronRightSVG from "./svg/ChevronRightSVG";
 import { router } from "expo-router";
 
-export default function ListItem({ item }: { item: ListItemProps }) {
+export default function ListItem({
+  item,
+  svg,
+}: {
+  item: ListItemProps;
+  svg?: React.ReactNode;
+}) {
   return (
     <TouchableOpacity
       onPress={() => {
@@ -12,7 +18,16 @@ export default function ListItem({ item }: { item: ListItemProps }) {
       }}
     >
       <View style={styles.container}>
-        <Text style={styles.header}>{item.header}</Text>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {svg}
+          <Text style={styles.header}>{item.header}</Text>
+        </View>
         {item.clickable && <ChevronRightSVG />}
       </View>
     </TouchableOpacity>
@@ -22,6 +37,8 @@ export default function ListItem({ item }: { item: ListItemProps }) {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
+    paddingLeft: 0,
+    paddingRight: 0,
     // paddingTop: 0,
     flexDirection: "row",
     alignItems: "center",
@@ -30,5 +47,6 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 16,
     fontWeight: 500,
+    marginLeft: 10,
   },
 });

@@ -6,18 +6,14 @@ export interface ListItemProps {
   clickable: boolean;
   header: string;
   navigation?: any;
+  svg?: React.ReactNode;
 }
 
 export default function ListComponent({ data }: { data: ListItemProps[] }) {
   return (
     <View style={styles.container}>
-      {/* <FlatList
-        data={data}
-        renderItem={({ item }) => <ListItem item={item} />}
-        keyExtractor={(item) => item.id}
-      /> */}
       {data.map((item) => (
-        <ListItem key={item.id} item={item} />
+        <ListItem key={item.id} item={item} svg={item.svg} />
       ))}
     </View>
   );

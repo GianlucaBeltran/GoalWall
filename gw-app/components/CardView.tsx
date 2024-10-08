@@ -1,5 +1,7 @@
 import { View, Text, StyleSheet } from "react-native";
 import ChevronLeftSVG from "./svg/ChevronLeftSVG";
+import LogoutSVG from "./svg/LogoutSVG";
+import CloseSVG from "./svg/CloseSVG";
 
 export default function CardView({
   children,
@@ -16,9 +18,9 @@ export default function CardView({
         {topNavigationHeader && (
           <>
             <View style={styles.topNavigation}>
-              <ChevronLeftSVG />
+              <CloseSVG />
               <Text style={styles.navigationTitle}>Account</Text>
-              <View style={{ width: 24, height: 24 }} />
+              <LogoutSVG />
             </View>
           </>
         )}
