@@ -1,6 +1,7 @@
 import CategoryTag from "@/components/CategoryTag";
 import ChevronLeftSVG from "@/components/svg/ChevronLeftSVG";
-import { useNavigation } from "expo-router";
+import ProfileIconSVG from "@/components/svg/ProfilIconSVG";
+import { router, useNavigation } from "expo-router";
 import { useState } from "react";
 import {
   ImageBackground,
@@ -147,20 +148,24 @@ export default function setGoals() {
                 alignItems: "center",
               }}
             >
-              <View
+              <TouchableOpacity
                 style={{
                   height: 74,
                   width: "100%",
+                  borderColor: "#0A7E84",
                   borderRadius: 15,
                   borderWidth: 1,
                   justifyContent: "center",
                   alignItems: "center",
+                  flexDirection: "row",
                 }}
+                onPress={() => router.navigate("/avatar")}
               >
-                <Text style={{ fontSize: 20, fontWeight: 500 }}>
+                <ProfileIconSVG />
+                <Text style={{ fontSize: 20, fontWeight: 500, marginLeft: 8 }}>
                   Set your avatar
                 </Text>
-              </View>
+              </TouchableOpacity>
               <TouchableOpacity
                 style={{
                   height: 47,
@@ -212,7 +217,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
     borderRadius: 15,
-    borderColor: "black",
+    borderColor: "#0A7E84",
     padding: 10,
   },
 });

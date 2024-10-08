@@ -27,7 +27,7 @@ export default function Home() {
   useEffect(() => {
     console.log("In account useEffect");
     const fetchUser = async () => {
-      const url = "http://192.168.0.249:3000/user/" + params.userId;
+      const url = "http://130.229.169.183:3000/user/" + params.userId;
       console.log(url);
       try {
         const response = await fetch(url, {

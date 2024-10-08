@@ -4,6 +4,7 @@ import OthersSVG from "@/components/svg/OthersSVG";
 import ShareSVG from "@/components/svg/ShareSVG";
 import WriteSVG from "@/components/svg/WriteSVG";
 import { router, useNavigation } from "expo-router";
+import { useEffect } from "react";
 import {
   ImageBackground,
   Text,

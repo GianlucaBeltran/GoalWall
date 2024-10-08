@@ -38,6 +38,7 @@ export default function RootLayout() {
         <Stack.Screen name="goal" />
         <Stack.Screen name="setGoals" />
         <Stack.Screen name="writeGoal" />
+        <Stack.Screen name="avatar" />
         <Stack.Screen name="+not-found" />
       </Stack>
     </ThemeProvider>

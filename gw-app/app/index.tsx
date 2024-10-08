@@ -84,7 +84,7 @@ export default function Home() {
       lastName,
     };
 
-    const url = "http://192.168.0.249:3000/user";
+    const url = "http://130.229.169.183:3000/user";
     try {
       const response = await fetch(url, {
         method: "POST",
