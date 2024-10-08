@@ -2,7 +2,16 @@ import { View, Text, StyleSheet } from "react-native";
 import ProfileSVG from "./svg/ProfileSVG";
 import GenderFemaleSVG from "./svg/GenderFemaleSVG";
 
-export default function AccountHeader() {
+export default function AccountHeader({
+  userName,
+  lastName,
+  userUid,
+}: {
+  userName: string;
+  lastName: string;
+  userUid: string;
+}) {
+  console.log(userName, lastName, userUid, "in header");
   return (
     <View style={styles.container}>
       <View style={styles.profileImage}>
@@ -10,11 +19,17 @@ export default function AccountHeader() {
       </View>
       <View style={styles.accountInfo}>
         <View style={styles.accountName}>
-          <Text style={styles.header}>Friendly Frog</Text>
-          <GenderFemaleSVG />
+          <Text style={styles.header}>
+            {userName} {lastName}
+          </Text>
         </View>
         <View>
-          <Text style={styles.subheader}>Profile Info</Text>
+          <Text style={[styles.subheader, { color: "#8A8787" }]}>
+            Member #{userUid}
+          </Text>
+        </View>
+        <View>
+          <Text style={styles.subheader}>Edit Profile</Text>
         </View>
       </View>
     </View>
@@ -35,7 +50,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 10,
   },
   header: {
     fontSize: 20,
