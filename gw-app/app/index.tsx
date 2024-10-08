@@ -1,5 +1,5 @@
 import { router, useNavigation } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -20,9 +20,13 @@ import AnimatedView, {
   withTiming,
 } from "react-native-reanimated";
 import { User } from "./types/user.types";
+import { AppActionType, AppDispatchContext } from "./_layout";
+import { urlHome } from "./constants/apiEndpoints";
 
 export default function Home() {
   const navigation = useNavigation();
+
+  const dispatch = useContext(AppDispatchContext);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -79,16 +83,15 @@ export default function Home() {
     }
     shrinkButton();
 
-    const user: User = {
+    const userLogin: User = {
       name: firstName,
       lastName,
     };
 
-    const url = "http://130.229.169.183:3000/user";
     try {
-      const response = await fetch(url, {
+      const response = await fetch(urlHome + "/user", {
         method: "POST",
-        body: JSON.stringify(user),
+        body: JSON.stringify(userLogin),
         headers: {
           "Content-Type": "application/json",
         },
@@ -97,12 +100,16 @@ export default function Home() {
         throw new Error(`Response status: ${response.status}`);
       }
 
-      const json = await response.json();
-      console.log(json, "in index");
+      const user = await response.json();
+      console.log(user, "in index");
       // setError(json.message);
+      if (!dispatch) return;
+      dispatch({
+        type: AppActionType.SET_USER,
+        payload: user.user,
+      });
       router.navigate({
         pathname: "/account",
-        params: { userId: json.userId },
       });
       return;
     } catch (error: any) {

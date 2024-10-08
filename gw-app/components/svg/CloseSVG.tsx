@@ -1,8 +1,14 @@
 import Svg, { Path } from "react-native-svg";
 
-export default function CloseSVG() {
+export default function CloseSVG({
+  width = 24,
+  height = 24,
+}: {
+  width?: number;
+  height?: number;
+}) {
   return (
-    <Svg width={24} height={24} fill="none" viewBox="0 0 24 24">
+    <Svg width={width} height={height} fill="none" viewBox="0 0 24 24">
       <Path
         id="Vector"
         d="M15.5 15.5L5.5 5.5M15.5 5.5L5.5 15.5"

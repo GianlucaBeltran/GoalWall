@@ -1,7 +1,11 @@
+import { Avatar } from "../constants/avatars";
+
 export interface Goal {
-  id: number;
+  id: string;
   description: string;
   createdAt: string;
   updatedAt: string;
-  userId: number;
+  categories?: string[];
+  avatar?: Avatar;
+  avatarFileName: string;
 }

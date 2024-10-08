@@ -1,8 +1,16 @@
 import Svg, { Path } from "react-native-svg";
 
-export default function GoalSVG() {
+export default function GoalSVG({
+  width = 24,
+  height = 24,
+  viewBox = "0 0 24 24",
+}: {
+  width?: number;
+  height?: number;
+  viewBox?: string;
+}) {
   return (
-    <Svg width={24} height={24} fill="none" viewBox="0 0 24 24">
+    <Svg width={width} height={height} fill="none" viewBox={viewBox}>
       <Path
         id="Vector"
         d="M10.66 10.66C10.3032 11.0149 10.1018 11.4968 10.1 12C10.1 12.5039 10.3002 12.9872 10.6565 13.3435C11.0128 13.6998 11.4961 13.9 12 13.9C12.5032 13.8981 12.9851 13.6968 13.34 13.34"

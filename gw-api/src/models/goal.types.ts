@@ -3,5 +3,6 @@ export interface Goal {
   description: string;
   createdAt: string;
   updatedAt: string;
-  userId: number;
+  categories?: string[];
+  avatarFileName: string;
 }

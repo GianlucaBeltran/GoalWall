@@ -1,7 +1,7 @@
 import { Goal } from "./goal.types";
 
 export interface User {
-  uid?: number;
+  uid?: string;
   name: string;
   lastName: string;
   gender?: "Male" | "Female" | "Other";
