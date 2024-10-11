@@ -12,7 +12,7 @@ import {
 } from "react-native";
 
 import { AppActionType, AppContext, AppDispatchContext } from "./_layout";
-import { urlHome } from "./constants/apiEndpoints";
+import { urlHome, urlSchool } from "./constants/apiEndpoints";
 import { Goal } from "./types/goal.types";
 import ScreenView from "@/components/ScreenView";
 
@@ -87,9 +87,13 @@ export default function setGoals() {
 
     const goal: Goal = {
       description: goalInput,
-      createdAt: new Date().toISOString(),
+      createdAt: appData.editingData.goal
+        ? appData.editingData.goal.createdAt
+        : new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      id: (appData.user.goals.length + 1).toString(),
+      id: appData.editingData.goal
+        ? appData.editingData.goal.id
+        : (appData.user.goals.length + 1).toString(),
       avatarFileName: appData.editingData?.avatar?.fileName,
     };
 
@@ -99,7 +103,7 @@ export default function setGoals() {
     };
 
     try {
-      const response = await fetch(urlHome + "/goal", {
+      const response = await fetch(appData.api + "/goal", {
         method: "POST",
         body: JSON.stringify(requestBody),
         headers: {
@@ -111,67 +115,6 @@ export default function setGoals() {
       }
 
       const user = await response.json();
-      dispatch({
-        type: AppActionType.SET_USER,
-        payload: user.user,
-      });
-      dispatch({
-        type: AppActionType.RESET_EDITING,
-        payload: null,
-      });
-
-      router.back();
-      return;
-    } catch (error: any) {
-      console.error(error.message);
-    }
-  };
-
-  const updateGoal = async () => {
-    if (
-      !appData ||
-      !appData.user ||
-      !appData.user.goals ||
-      !appData.editingData ||
-      !appData.editingData.goal ||
-      !appData.editingData.avatar
-    )
-      return;
-
-    const goal: Goal = {
-      description: goalInput,
-      createdAt: appData.editingData.goal?.createdAt,
-      updatedAt: new Date().toISOString(),
-      id: appData.editingData.goal.id,
-      avatarFileName: appData.editingData.avatar.fileName,
-    };
-
-    const requestBody = {
-      goal,
-    };
-
-    try {
-      const response = await fetch(
-        urlHome +
-          "/goal/" +
-          appData.user.uid +
-          "/" +
-          appData.editingData.goal.id,
-        {
-          method: "POST",
-          body: JSON.stringify(requestBody),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (!response.ok) {
-        throw new Error(`Response status: ${response.status}`);
-      }
-
-      const user = await response.json();
-
-      if (!dispatch) return;
       dispatch({
         type: AppActionType.SET_USER,
         payload: user.user,
@@ -322,9 +265,7 @@ export default function setGoals() {
             backgroundColor: "#EDEDED",
           }}
           disabled={disableSubmit ? true : false}
-          onPress={() =>
-            appData?.editingData?.goal ? updateGoal() : shareGoal()
-          }
+          onPress={() => shareGoal()}
         >
           <Text
             style={{

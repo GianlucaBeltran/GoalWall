@@ -20,13 +20,14 @@ import AnimatedView, {
   withTiming,
 } from "react-native-reanimated";
 import { User } from "./types/user.types";
-import { AppActionType, AppDispatchContext } from "./_layout";
-import { urlHome } from "./constants/apiEndpoints";
+import { AppActionType, AppContext, AppDispatchContext } from "./_layout";
+import { urlHome, urlSchool } from "./constants/apiEndpoints";
 
 export default function Home() {
   const navigation = useNavigation();
 
   const dispatch = useContext(AppDispatchContext);
+  const appData = useContext(AppContext);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -89,7 +90,9 @@ export default function Home() {
     };
 
     try {
-      const response = await fetch(urlHome + "/user", {
+      console.log(appData?.api + "/user", "api");
+      console.log(urlHome + "/user", "api");
+      const response = await fetch(appData?.api + "/user", {
         method: "POST",
         body: JSON.stringify(userLogin),
         headers: {
@@ -97,6 +100,7 @@ export default function Home() {
         },
       });
       if (!response.ok) {
+        console.log(response.status, "response status");
         throw new Error(`Response status: ${response.status}`);
       }
 
@@ -138,6 +142,10 @@ export default function Home() {
               // style={{ flex: 1 }}
             >
               <View style={styles.container}>
+                <Text style={{ fontSize: 30, fontWeight: "bold" }}>
+                  Goal Wall
+                </Text>
+
                 <View style={styles.loginContainer}>
                   <View style={styles.loginSection}>
                     <Text

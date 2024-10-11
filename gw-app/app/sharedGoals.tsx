@@ -40,6 +40,45 @@ export default function sharedGoals() {
     router.navigate("/writeGoal");
   };
 
+  const handleDeleteGoal = async (goalId: string) => {
+    if (!appData || !appData.user) return;
+
+    if (!dispatch) return;
+
+    const requestBody = {
+      goalId: goalId,
+      userId: appData.user.uid,
+    };
+
+    console.log(requestBody, "requestBody");
+
+    try {
+      const response = await fetch(appData.api + "/goal", {
+        method: "DELETE",
+        body: JSON.stringify(requestBody),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+
+      const user = await response.json();
+      dispatch({
+        type: AppActionType.SET_USER,
+        payload: user.user,
+      });
+      dispatch({
+        type: AppActionType.RESET_EDITING,
+        payload: null,
+      });
+      return;
+    } catch (error: any) {
+      console.error(error.message);
+    }
+  };
+
   return (
     <ScreenView title="Your shared goals">
       {appData?.user?.goals && appData.user?.goals.length === 0 && (
@@ -105,7 +144,6 @@ export default function sharedGoals() {
               data={appData?.user?.goals}
               renderItem={({ item }) => {
                 const avatar = getAvatar(item.avatarFileName);
-                console.log(item.avatarFileName, "avatarFileName");
                 return (
                   <View
                     style={{
@@ -160,7 +198,11 @@ export default function sharedGoals() {
                           <TouchableOpacity onPress={() => handleEdit(item)}>
                             <EditSVG />
                           </TouchableOpacity>
-                          <TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => {
+                              handleDeleteGoal(item.id);
+                            }}
+                          >
                             <CloseSVG width={28} height={28} />
                           </TouchableOpacity>
                         </View>

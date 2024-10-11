@@ -14,6 +14,9 @@ import { User } from "./types/user.types";
 import { Goal } from "./types/goal.types";
 import { ImageSourcePropType } from "react-native";
 import { Avatar } from "./constants/avatars";
+import { urlHome, urlSchool } from "./constants/apiEndpoints";
+import NetInfo from "@react-native-community/netinfo";
+import * as Location from "expo-location";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -26,6 +29,7 @@ interface EditingData {
 interface AppData {
   user: User | null;
   editingData: EditingData | null;
+  api: string;
   isLoading: boolean;
 }
 
@@ -34,6 +38,7 @@ export enum AppActionType {
   SET_EDITING_AVATAR,
   SET_EDITING_GOAL,
   RESET_EDITING,
+  SET_API,
   SET_LOADING,
 }
 
@@ -74,6 +79,8 @@ function appDataReducer(appData: AppData, action: AppAction): AppData {
       };
     case AppActionType.RESET_EDITING:
       return { ...appData, editingData: null };
+    case AppActionType.SET_API:
+      return { ...appData, api: action.payload as string };
     case AppActionType.SET_LOADING:
       return { ...appData, isLoading: action.payload as boolean };
     default:
@@ -90,8 +97,26 @@ export default function RootLayout() {
   const [appData, dispatch] = useReducer(appDataReducer, {
     user: null,
     editingData: null,
+    api: "",
     isLoading: false,
   });
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        return;
+      }
+
+      const ipAddress = (await NetInfo.fetch()).details?.ipAddress;
+      console.log(ipAddress, "apiAdress");
+      dispatch({
+        type: AppActionType.SET_API,
+        payload: ipAddress.split(".")[0] === "192" ? urlHome : urlSchool,
+      });
+    })();
+  }, []);
 
   useEffect(() => {
     if (loaded) {
