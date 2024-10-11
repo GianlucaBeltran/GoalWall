@@ -1,207 +1,152 @@
 import express from "express";
 import { User } from "./models/user.types";
-import fs from "fs";
 import { Goal } from "./models/goal.types";
+import {
+  checkIfGoalExists,
+  findUser,
+  findUserWithId,
+  readFile,
+} from "./models/readData";
+import { writeData } from "./models/insertData";
+import { goalFilePath } from "./constants/filePaths";
+
 const app = express();
 app.use(express.json());
 
 const port = 3000;
 
-app.get("/", (req, res) => {
-  console.log("test");
-  res.send({ message: "Hello World!" });
+app.post("/user", async (req, res) => {
+  const userFromRequest: User = req.body;
+  console.log("Recieved user ", userFromRequest, " from app");
+
+  const userJson = await readFile<{ users: User[] }>(goalFilePath);
+
+  const userFromData = findUser(userJson.users, userFromRequest);
+  console.log(userFromData ? "User already exists" : "New user");
+
+  if (userFromData) {
+    res.send({
+      user: userFromData,
+    });
+    return;
+  }
+
+  const newUser = {
+    ...userFromRequest,
+    uid: (userJson.users.length + 1).toString(),
+    goals: [],
+  };
+
+  userJson.users.push(newUser);
+
+  await writeData(goalFilePath, userJson);
+
+  res.send({
+    user: newUser,
+  });
 });
 
-app.post("/user", (req, res) => {
-  const user: User = req.body;
-  console.log(user);
+app.get("/user/:id", async (req, res) => {
+  const userIdFromRequest: string = req.params.id;
+  console.log("Recieved user id ", userIdFromRequest, " from app");
 
-  fs.readFile(
-    "/Users/gianlucabeltran/KTH/1Sem/GoalWall/gw-api/src/data/users.json",
-    "utf8",
-    function readFileCallback(err, data) {
-      if (err) {
-        console.log(err, "error");
-      } else {
-        var usersJsonData = JSON.parse(data);
-        for (let i = 0; i < usersJsonData.users.length; i++) {
-          if (
-            usersJsonData.users[i].name === user.name &&
-            usersJsonData.users[i].lastName === user.lastName
-          ) {
-            res.send({
-              status: "user already exists",
-              message:
-                "User " + user.name + " " + user.lastName + " already exists!",
-              user: usersJsonData.users[i],
-            });
-            return;
-          }
-        }
-        user.uid = usersJsonData.users.length + 1;
-        user.goals = [];
-        usersJsonData.users.push(user);
+  const userJson = await readFile<{ users: User[] }>(goalFilePath);
 
-        var usersJson = JSON.stringify(usersJsonData);
-        console.log(usersJson, "usersJson");
+  const userFromData = findUserWithId(userJson.users, userIdFromRequest);
+  console.log(userFromData ? "User found" : "User not found");
 
-        fs.writeFile(
-          "/Users/gianlucabeltran/KTH/1Sem/GoalWall/gw-api/src/data/users.json",
-          usersJson,
-          "utf8",
-          (err) => {
-            if (err) {
-              console.log(err);
-            } else {
-              res.send({
-                message:
-                  "User" + user.name + " " + user.lastName + " was created!",
-                user: usersJsonData.users[usersJsonData.users.length - 1],
-              });
-            }
-          }
-        ); // write it back
-      }
-    }
-  );
+  if (userFromData) {
+    res.send({
+      user: userFromData,
+    });
+  }
 });
 
-app.get("/user/:id", (req, res) => {
-  console.log(req.params, "params");
-  fs.readFile(
-    "/Users/gianlucabeltran/KTH/1Sem/GoalWall/gw-api/src/data/users.json",
-    "utf8",
-    function readFileCallback(err, data) {
-      if (err) {
-        console.log(err, "error");
-      } else {
-        var usersJsonData = JSON.parse(data);
-        console.log(usersJsonData, "usersJsonData", req.params.id);
-        for (let i = 0; i < usersJsonData.users.length; i++) {
-          console.log(usersJsonData.users[i].uid, req.params.id);
-          if (usersJsonData.users[i].uid == req.params.id) {
-            console.log(usersJsonData.users[i]);
-            res.send({
-              status: "user found",
-              user: usersJsonData.users[i],
-            });
-            console.log("User sent");
-            return;
-          }
-        }
-        res.send({
-          status: "user not found",
-          message: "User with id " + req.params.id + " was not found!",
-        });
-        console.log("User with id " + req.params.id + " was not found!");
-      }
-    }
-  );
-});
-
-app.post("/goal", (req, res) => {
-  console.log(req.body);
+app.post("/goal", async (req, res) => {
   const goal: Goal = req.body.goal;
-  const userId = req.body.userId;
+  const userId: string = req.body.userId;
+  console.log("Recieved goal ", goal, " from app for user with id ", userId);
 
-  fs.readFile(
-    "/Users/gianlucabeltran/KTH/1Sem/GoalWall/gw-api/src/data/users.json",
-    "utf8",
-    function readFileCallback(err, data) {
-      if (err) {
-        console.log(err, "error");
-      } else {
-        var usersJsonData = JSON.parse(data);
-        for (let i = 0; i < usersJsonData.users.length; i++) {
-          if (usersJsonData.users[i].uid == userId) {
-            usersJsonData.users[i].goals.push(goal);
-            var usersJson = JSON.stringify(usersJsonData);
-            fs.writeFile(
-              "/Users/gianlucabeltran/KTH/1Sem/GoalWall/gw-api/src/data/users.json",
-              usersJson,
-              "utf8",
-              (err) => {
-                if (err) {
-                  console.log(err);
-                } else {
-                  res.send({
-                    message: "Goal was added to user with id " + userId,
-                    user: usersJsonData.users[i],
-                  });
-                }
-              }
-            );
-            return;
-          }
-        }
-        res.send({
-          status: "user not found",
-          message: "User with id " + userId + " was not found!",
-        });
-      }
-    }
+  const userJson = await readFile<{ users: User[] }>(goalFilePath);
+
+  const userFromData = findUserWithId(userJson.users, userId);
+  console.log(userFromData ? "User found" : "User not found");
+
+  if (!userFromData) {
+    res.send({
+      message: "User not found",
+    });
+    return;
+  }
+
+  const existingGoal = checkIfGoalExists(userFromData, goal.id);
+  console.log(
+    existingGoal
+      ? "Goal already exists replacing with incoming goal"
+      : "New goal"
   );
+
+  if (existingGoal) {
+    const goalIndex = userFromData.goals.indexOf(existingGoal);
+    const userIndex = userJson.users.indexOf(userFromData);
+    userFromData.goals.splice(goalIndex, 1, goal);
+    userJson.users.splice(userIndex, 1, userFromData);
+  } else {
+    const userIndex = userJson.users.indexOf(userFromData);
+    userFromData.goals.push(goal);
+    userJson.users.splice(userIndex, 1, userFromData);
+  }
+
+  await writeData(goalFilePath, userJson);
+
+  res.send({
+    user: userFromData,
+  });
 });
 
-app.post("/goal/:userId/:goalId", (req, res) => {
-  console.log(req.params, "params");
-  fs.readFile(
-    "/Users/gianlucabeltran/KTH/1Sem/GoalWall/gw-api/src/data/users.json",
-    "utf8",
-    function readFileCallback(err, data) {
-      if (err) {
-        console.log(err, "error");
-      } else {
-        var usersJsonData = JSON.parse(data);
-        console.log(usersJsonData, "usersJsonData", req.params.userId);
-        for (let i = 0; i < usersJsonData.users.length; i++) {
-          console.log(usersJsonData.users[i].uid, req.params.userId);
-          if (usersJsonData.users[i].uid == req.params.userId) {
-            console.log(usersJsonData.users[i]);
-            for (let j = 0; j < usersJsonData.users[i].goals.length; j++) {
-              if (usersJsonData.users[i].goals[j].id == req.params.goalId) {
-                usersJsonData.users[i].goals.splice(j, 1, req.body.goal);
-                var usersJson = JSON.stringify(usersJsonData);
-                fs.writeFile(
-                  "/Users/gianlucabeltran/KTH/1Sem/GoalWall/gw-api/src/data/users.json",
-                  usersJson,
-                  "utf8",
-                  (err) => {
-                    if (err) {
-                      console.log(err);
-                    } else {
-                      res.send({
-                        message:
-                          "Goal with id " +
-                          req.params.goalId +
-                          " was deleted from user with id " +
-                          req.params.userId,
-                        user: usersJsonData.users[i],
-                      });
-                    }
-                  }
-                );
-                return;
-              }
-            }
-            res.send({
-              status: "goal not found",
-              message:
-                "Goal with id " +
-                req.params.goalId +
-                " was not found in user with id " +
-                req.params.userId,
-            });
-            return;
-          }
-        }
-        res.send({
-          status: "user not found",
-          message: "User with id " + req.params.userId + " was not found!",
-        });
-      }
-    }
+app.delete("/goal", async (req, res) => {
+  const goalId: string = req.body.goalId;
+  const userId: string = req.body.userId;
+  console.log(
+    "Recieved goal id ",
+    goalId,
+    " from app for user with id ",
+    userId
   );
+
+  const userJson = await readFile<{ users: User[] }>(goalFilePath);
+
+  const userFromData = findUserWithId(userJson.users, userId);
+  console.log(userFromData ? "User found" : "User not found");
+
+  if (!userFromData) {
+    res.send({
+      message: "User not found",
+    });
+    return;
+  }
+
+  const existingGoal = checkIfGoalExists(userFromData, goalId);
+  console.log(existingGoal ? "Goal found" : "Goal not found");
+
+  if (!existingGoal) {
+    res.send({
+      message: "Goal not found",
+    });
+    return;
+  }
+
+  const goalIndex = userFromData.goals.indexOf(existingGoal);
+  const userIndex = userJson.users.indexOf(userFromData);
+  userFromData.goals.splice(goalIndex, 1);
+  userJson.users.splice(userIndex, 1, userFromData);
+
+  await writeData(goalFilePath, userJson);
+  console.log("Goal deleted");
+
+  res.send({
+    user: userFromData,
+  });
 });
 
 app.listen(port, () => {

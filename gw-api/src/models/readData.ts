@@ -1,15 +1,40 @@
-export const getUser = (id: number) => {
-  return { message: "User with id " + id + " was found!" };
-};
+import fs from "fs/promises";
+import { User } from "./user.types";
+import { Goal } from "./goal.types";
 
-export const getUsers = () => {
-  return { message: "All users were found!" };
-};
+export async function readFile<T>(fileName: string): Promise<T | null> {
+  try {
+    const data = await fs.readFile(fileName, "utf8");
+    return JSON.parse(data);
+  } catch (err) {
+    console.log("Error reading data: ", err);
+    return null;
+  }
+}
 
-export const getGoal = (id: number) => {
-  return { message: "Goal with id " + id + " was found!" };
-};
+export function findUser(users: User[], user: User): User | null {
+  for (let i = 0; i < users.length; i++) {
+    if (users[i].name === user.name && users[i].lastName === user.lastName) {
+      return users[i];
+    }
+  }
+  return null;
+}
 
-export const getGoals = () => {
-  return { message: "All goals were found!" };
-};
+export function findUserWithId(users: User[], id: string): User | null {
+  for (let i = 0; i < users.length; i++) {
+    if (users[i].uid === id) {
+      return users[i];
+    }
+  }
+  return null;
+}
+
+export function checkIfGoalExists(user: User, goalId: string): Goal | null {
+  for (let i = 0; i < user.goals.length; i++) {
+    if (user.goals[i].id === goalId) {
+      return user.goals[i];
+    }
+  }
+  return null;
+}

@@ -1,5 +1,5 @@
 export interface Goal {
-  id: number;
+  id: string;
   description: string;
   createdAt: string;
   updatedAt: string;
