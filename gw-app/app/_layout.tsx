@@ -5,88 +5,27 @@ import {
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import { createContext, useContext, useEffect, useReducer } from "react";
+import { useEffect, useReducer } from "react";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Stack } from "expo-router";
-import { User } from "./types/user.types";
-import { Goal } from "./types/goal.types";
+import { User, Goal, Comment } from "./types/data.types";
 import { ImageSourcePropType } from "react-native";
-import { Avatar } from "./constants/avatars";
-import { urlHome, urlSchool } from "./constants/apiEndpoints";
+import { urlHome, urlNgrok, urlSchool } from "./constants/apiEndpoints";
 import NetInfo from "@react-native-community/netinfo";
 import * as Location from "expo-location";
+import { Avatar } from "./types/avatar.types";
+import {
+  AppActionType,
+  AppContext,
+  appDataReducer,
+  AppDispatchContext,
+} from "./context/appContext";
+import sharedGoals from "./othersGoals";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
-
-interface EditingData {
-  goal?: Goal | null;
-  avatar?: Avatar | null;
-}
-
-interface AppData {
-  user: User | null;
-  editingData: EditingData | null;
-  api: string;
-  isLoading: boolean;
-}
-
-export enum AppActionType {
-  SET_USER,
-  SET_EDITING_AVATAR,
-  SET_EDITING_GOAL,
-  RESET_EDITING,
-  SET_API,
-  SET_LOADING,
-}
-
-export interface AppAction {
-  type: AppActionType;
-  payload: User | Goal | Avatar | boolean | string | null | EditingData;
-}
-
-export const AppContext = createContext<AppData | null>(null);
-export const AppDispatchContext =
-  createContext<React.Dispatch<AppAction> | null>(null);
-
-// This hook can be used to access the user info.
-export function useAppContext() {
-  const value = useContext(AppContext);
-  return value;
-}
-
-function appDataReducer(appData: AppData, action: AppAction): AppData {
-  switch (action.type) {
-    case AppActionType.SET_USER:
-      return { ...appData, user: action.payload as User };
-    case AppActionType.SET_EDITING_AVATAR:
-      return {
-        ...appData,
-        editingData: {
-          ...appData.editingData,
-          avatar: action.payload as Avatar,
-        },
-      };
-    case AppActionType.SET_EDITING_GOAL:
-      return {
-        ...appData,
-        editingData: {
-          ...appData.editingData,
-          goal: action.payload as Goal,
-        },
-      };
-    case AppActionType.RESET_EDITING:
-      return { ...appData, editingData: null };
-    case AppActionType.SET_API:
-      return { ...appData, api: action.payload as string };
-    case AppActionType.SET_LOADING:
-      return { ...appData, isLoading: action.payload as boolean };
-    default:
-      return appData;
-  }
-}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -97,26 +36,33 @@ export default function RootLayout() {
   const [appData, dispatch] = useReducer(appDataReducer, {
     user: null,
     editingData: null,
-    api: "",
+    api: urlHome,
     isLoading: false,
+    sharedGoals: [],
+    myGoals: [],
   });
 
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        console.log("Permission to access location was denied");
-        return;
-      }
+  // useEffect(() => {
+  //   (async () => {
+  //     let { status } = await Location.requestForegroundPermissionsAsync();
+  //     if (status !== "granted") {
+  //       console.log("Permission to access location was denied");
+  //       return;
+  //     }
 
-      const ipAddress = (await NetInfo.fetch()).details?.ipAddress;
-      console.log(ipAddress, "apiAdress");
-      dispatch({
-        type: AppActionType.SET_API,
-        payload: ipAddress.split(".")[0] === "192" ? urlHome : urlSchool,
-      });
-    })();
-  }, []);
+  //     // const ipAddress = (await NetInfo.fetch()).details?.ipAddress;
+  //     // console.log(ipAddress, "apiAdress");
+  //     // dispatch({
+  //     //   type: AppActionType.SET_API,
+  //     //   payload: ipAddress.split(".")[0] === "192" ? urlHome : urlSchool,
+  //     // });
+
+  //     // dispatch({
+  //     //   type: AppActionType.SET_API,
+  //     //   payload: urlHome,
+  //     // });
+  //   })();
+  // }, []);
 
   useEffect(() => {
     if (loaded) {
@@ -137,11 +83,12 @@ export default function RootLayout() {
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="index" />
             <Stack.Screen name="account" />
-            <Stack.Screen name="goal" />
-            <Stack.Screen name="setGoals" />
+            <Stack.Screen name="mainMenu" />
+            <Stack.Screen name="goalWall" />
             <Stack.Screen name="writeGoal" />
             <Stack.Screen name="avatar" />
             <Stack.Screen name="sharedGoals" />
+            <Stack.Screen name="othersGoals" />
             <Stack.Screen name="+not-found" />
           </Stack>
         </ThemeProvider>

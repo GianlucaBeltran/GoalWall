@@ -11,12 +11,22 @@ import {
   Image,
 } from "react-native";
 
-import { AppActionType, AppContext, AppDispatchContext } from "./_layout";
-import { urlHome, urlSchool } from "./constants/apiEndpoints";
-import { Goal } from "./types/goal.types";
+import {
+  AppActionType,
+  AppContext,
+  AppDispatchContext,
+} from "./context/appContext";
+import { Goal } from "./types/data.types";
 import ScreenView from "@/components/ScreenView";
+import { getAvatar } from "./constants/avatars";
+import AvatarImage from "@/components/AvatarImage";
 
-const categories = [
+interface Category {
+  id: string;
+  name: string;
+}
+
+const categories: Category[] = [
   {
     id: "0",
     name: "+ Create a category",
@@ -52,16 +62,21 @@ export default function setGoals() {
 
   const dispatch = useContext(AppDispatchContext);
   const appData = useContext(AppContext);
-
   const [goalInput, setGoalInput] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>(
+    appData?.editingData?.goal?.categories || []
+  );
 
   const disableSubmit =
     goalInput.trim().length === 0 ||
     goalInput.trim().length > 50 ||
-    !appData?.editingData?.avatar ||
-    (appData.editingData.avatar.fileName ===
-      appData?.editingData?.goal?.avatarFileName &&
-      appData.editingData.goal.description === goalInput);
+    (appData?.editingData?.goal?.description === goalInput &&
+      selectedCategories.sort((a, b) => {
+        return a.id < b.id ? -1 : 1;
+      }) ===
+        appData?.editingData?.goal?.categories?.sort((a, b) => {
+          return a.id < b.id ? -1 : 1;
+        }));
 
   const handleGoalInput = (text: string) => {
     if (text.trim().length > 50) return;
@@ -74,32 +89,29 @@ export default function setGoals() {
   };
 
   const shareGoal = async () => {
-    if (
-      !appData ||
-      !appData.user ||
-      !appData.user.goals ||
-      !appData.editingData ||
-      !appData.editingData.avatar
-    )
-      return;
+    if (!appData || !appData.user) return;
 
     if (!dispatch) return;
 
     const goal: Goal = {
       description: goalInput,
-      createdAt: appData.editingData.goal
+      createdAt: appData.editingData?.goal
         ? appData.editingData.goal.createdAt
         : new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      id: appData.editingData.goal
-        ? appData.editingData.goal.id
-        : (appData.user.goals.length + 1).toString(),
-      avatarFileName: appData.editingData?.avatar?.fileName,
+      categories: selectedCategories,
+      id: appData.editingData?.goal?.id || "",
+      comments: appData.editingData?.goal?.comments || [],
+      authorId: appData.user.uid,
+      reactions: appData.editingData?.goal?.reactions || [],
     };
 
     const requestBody = {
       goal,
       userId: appData.user.uid,
+      avatarFileName: appData.editingData?.avatar?.fileName
+        ? appData.editingData.avatar.fileName
+        : undefined,
     };
 
     try {
@@ -123,8 +135,9 @@ export default function setGoals() {
         type: AppActionType.RESET_EDITING,
         payload: null,
       });
+      setSelectedCategories([]);
 
-      router.back();
+      router.dismiss(!appData.user.avatarFileName ? 2 : 1);
       return;
     } catch (error: any) {
       console.error(error.message);
@@ -164,7 +177,35 @@ export default function setGoals() {
         </Text>
         <View style={styles.categoryContainer}>
           {categories.map((category) => (
-            <CategoryTag key={category.id} category={category.name} />
+            <TouchableOpacity
+              key={category.id}
+              onPress={() => {
+                setSelectedCategories((prev) => {
+                  if (
+                    prev.find(
+                      (prevCategory) => prevCategory.name === category.name
+                    )
+                  ) {
+                    return prev.filter(
+                      (prevCategory) => prevCategory.name !== category.name
+                    );
+                  } else {
+                    return [...prev, category];
+                  }
+                });
+              }}
+            >
+              <CategoryTag
+                category={category.name}
+                selected={
+                  selectedCategories.find((selectedCategory) => {
+                    return selectedCategory.name === category.name;
+                  })
+                    ? true
+                    : false
+                }
+              />
+            </TouchableOpacity>
           ))}
         </View>
       </View>
@@ -208,53 +249,14 @@ export default function setGoals() {
           alignItems: "center",
         }}
       >
-        <TouchableOpacity
-          style={{ width: "100%" }}
-          onPress={() => router.navigate("/avatar")}
-        >
-          {appData?.editingData?.avatar ? (
-            <View>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: 500,
-                  textAlign: "center",
-                  marginBottom: 20,
-                }}
-              >
-                Change your avatar
-              </Text>
-              <View style={styles.avatarContainer}>
-                <Image
-                  source={appData.editingData.avatar.image}
-                  style={{
-                    width: 90,
-                    height: 90,
-                    borderRadius: 90,
-                  }}
-                />
-              </View>
-            </View>
-          ) : (
-            <View
-              style={{
-                height: 74,
-                width: "100%",
-                borderColor: "#0A7E84",
-                borderRadius: 15,
-                borderWidth: 1,
-                justifyContent: "center",
-                alignItems: "center",
-                flexDirection: "row",
-              }}
-            >
-              <ProfileIconSVG />
-              <Text style={{ fontSize: 20, fontWeight: 500, marginLeft: 8 }}>
-                Set your avatar
-              </Text>
-            </View>
-          )}
-        </TouchableOpacity>
+        <AvatarImage
+          avatarImage={
+            appData?.editingData?.avatar?.image
+              ? appData.editingData.avatar.image
+              : getAvatar(appData?.user?.avatarFileName)?.image
+          }
+          size={100}
+        />
         <TouchableOpacity
           style={{
             height: 47,
@@ -262,7 +264,8 @@ export default function setGoals() {
             borderRadius: 15,
             justifyContent: "center",
             alignItems: "center",
-            backgroundColor: "#EDEDED",
+            backgroundColor: "black",
+            opacity: disableSubmit ? 0.5 : 1,
           }}
           disabled={disableSubmit ? true : false}
           onPress={() => shareGoal()}
@@ -271,7 +274,7 @@ export default function setGoals() {
             style={{
               fontSize: 20,
               fontWeight: 600,
-              opacity: disableSubmit ? 0.3 : 1,
+              color: "white",
             }}
           >
             {appData?.editingData?.goal ? "Update and share" : "Share"}
@@ -291,7 +294,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 10,
-    justifyContent: "space-evenly",
+    // justifyContent: "space-evenly",
   },
   inputContainer: {
     borderRadius: 10,
@@ -304,7 +307,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
     borderRadius: 15,
-    borderColor: "#0A7E84",
+    borderColor: "black",
     padding: 10,
   },
   avatarContainer: {

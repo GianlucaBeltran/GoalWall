@@ -15,9 +15,11 @@ import ChevronLeftSVG from "@/components/svg/ChevronLeftSVG";
 export default function ScreenView({
   title,
   children,
+  touchableWithoutFeedback = true,
 }: {
   title: string;
   children: React.ReactNode;
+  touchableWithoutFeedback?: boolean;
 }) {
   const navigation = useNavigation();
 
@@ -34,6 +36,7 @@ export default function ScreenView({
               Keyboard.dismiss();
             }
           }}
+          disabled={!touchableWithoutFeedback}
         >
           <View style={styles.container}>
             <View

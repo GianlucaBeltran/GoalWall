@@ -7,7 +7,7 @@ import { useNavigation } from "expo-router";
 import { useContext, useEffect } from "react";
 import { ImageBackground } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { AppContext } from "./_layout";
+import { AppContext } from "./context/appContext";
 
 export default function Home() {
   const navigation = useNavigation();
@@ -31,7 +31,11 @@ export default function Home() {
             <AccountHeader
               userName={appData?.user?.name ? appData?.user?.name : ""}
               lastName={appData?.user?.lastName ? appData?.user?.lastName : ""}
-              userUid={appData?.user?.uid ? appData?.user?.uid : ""}
+              userUid={
+                appData?.user?.userNumber
+                  ? appData?.user?.userNumber.toString()
+                  : " unknown"
+              }
             />
           }
         >
@@ -41,15 +45,14 @@ export default function Home() {
                 id: "1",
                 header: "Membership",
                 clickable: true,
-                navigation: "/goal",
                 svg: <MembermshipSVG />,
               },
               {
                 id: "2",
                 header: "Set your goals",
                 clickable: true,
-                navigation: "/setGoals",
-                svg: <GoalSVG />,
+                navigation: "/mainMenu",
+                svg: <GoalSVG stroke="black" />,
               },
             ]}
           />

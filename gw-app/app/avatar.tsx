@@ -1,5 +1,5 @@
-import { useNavigation } from "expo-router";
-import { useContext } from "react";
+import { router, useNavigation } from "expo-router";
+import { Dispatch, useContext } from "react";
 import {
   ImageBackground,
   Text,
@@ -9,38 +9,123 @@ import {
   Image,
 } from "react-native";
 
-import { AppActionType, AppContext, AppDispatchContext } from "./_layout";
+import {
+  AppAction,
+  AppActionType,
+  AppContext,
+  AppDispatchContext,
+} from "./context/appContext";
 import ScreenView from "@/components/ScreenView";
 
 import Avatars from "./constants/avatars";
-// import CardView from "@/components/CardView";
+import { Avatar } from "./types/avatar.types";
 
-export default function setGoals() {
+export function AvatarButton({
+  dispatch,
+  avatar,
+  appDataAvatar,
+  callBack,
+}: {
+  dispatch: Dispatch<AppAction> | null;
+  avatar: Avatar;
+  appDataAvatar: Avatar | null | undefined;
+  callBack?: () => Promise<void>;
+}) {
+  const appData = useContext(AppContext);
+
+  const handeSelectAvatar = (avatar: Avatar) => {
+    if (!dispatch) return;
+
+    if (callBack) {
+      callBack();
+      return;
+    }
+
+    dispatch({
+      type: AppActionType.SET_EDITING_AVATAR,
+      payload: avatar,
+    });
+    router.navigate("/writeGoal");
+  };
+  return (
+    <TouchableOpacity
+      activeOpacity={
+        appData?.user?.avatarFileName === avatar.fileName ? 1 : 0.6
+      }
+      onPress={() => {
+        handeSelectAvatar(avatar);
+      }}
+      key={avatar.id}
+      disabled={appDataAvatar?.id === avatar.id}
+    >
+      <Image
+        source={avatar.image}
+        style={{
+          width: 75,
+          height: 75,
+          borderRadius: 75,
+          borderColor:
+            appDataAvatar?.id === avatar.id ||
+            appData?.user?.avatarFileName === avatar.fileName
+              ? "black"
+              : "",
+          borderWidth:
+            appDataAvatar?.id === avatar.id ||
+            appData?.user?.avatarFileName === avatar.fileName
+              ? 2
+              : 0,
+          opacity:
+            appDataAvatar?.id === avatar.id ||
+            appData?.user?.avatarFileName === avatar.fileName
+              ? 0.6
+              : 1,
+        }}
+      />
+    </TouchableOpacity>
+  );
+}
+
+export default function avatar() {
   const navigation = useNavigation();
   const dispatch = useContext(AppDispatchContext);
   const appData = useContext(AppContext);
 
+  const isEditing =
+    appData?.user?.avatarFileName || appData?.editingData?.avatar?.fileName;
+
   return (
-    <ScreenView title="Set your avatar">
+    <ScreenView title={isEditing ? "Change avatar" : "Set your avatar"}>
       <View
         style={{
           alignItems: "center",
           justifyContent: "center",
-          // flex: 0.3,
         }}
       >
+        <View style={{ width: "70%" }}>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: 400,
+              marginBottom: 20,
+              textAlign: "center",
+            }}
+          >
+            Goals are shared anonymously, so choose an avatar to help identify
+            your goal on the wall.
+          </Text>
+        </View>
         <View style={styles.costumeAvatar}>
           <ImageBackground
             source={require("../assets/images/costumeAvatar.png")}
             style={{
-              width: 186.381,
-              height: 173,
+              width: 110,
+              height: 110,
               justifyContent: "center",
               alignItems: "center",
             }}
           >
-            <Text style={{ fontSize: 24, fontWeight: 600 }}>+</Text>
-            <Text style={{ fontSize: 16, fontWeight: 500 }}>
+            <Text style={{ fontSize: 20, fontWeight: 600 }}>+</Text>
+            <Text style={{ fontSize: 12, fontWeight: 500 }}>
               Create your own
             </Text>
           </ImageBackground>
@@ -74,34 +159,44 @@ export default function setGoals() {
           </View>
         </View>
       </View>
-      <View style={styles.avatarsContainer}>
-        {Avatars.map((avatar) => (
-          <TouchableOpacity
-            onPress={() => {
-              if (!dispatch) return;
-              dispatch({
-                type: AppActionType.SET_EDITING_AVATAR,
-                payload: avatar,
-              });
-              navigation.goBack();
-            }}
-            key={avatar.id}
-            style={{
-              opacity:
-                appData?.editingData?.avatar?.image === avatar.image ? 0.5 : 1,
-            }}
-            disabled={appData?.editingData?.avatar?.image === avatar.image}
-          >
-            <Image
-              source={avatar.image}
-              style={{
-                width: 75,
-                height: 75,
-                borderRadius: 75,
-              }}
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          gap: 30,
+        }}
+      >
+        <View style={styles.avatarsContainer}>
+          {Avatars.slice(0, 2).map((avatar) => (
+            <AvatarButton
+              key={avatar.id}
+              dispatch={dispatch}
+              avatar={avatar}
+              appDataAvatar={appData?.editingData?.avatar}
             />
-          </TouchableOpacity>
-        ))}
+          ))}
+        </View>
+        <View style={styles.avatarsContainer}>
+          {Avatars.slice(2, 5).map((avatar) => (
+            <AvatarButton
+              key={avatar.id}
+              dispatch={dispatch}
+              avatar={avatar}
+              appDataAvatar={appData?.editingData?.avatar}
+            />
+          ))}
+        </View>
+        <View style={styles.avatarsContainer}>
+          {Avatars.slice(5, 7).map((avatar) => (
+            <AvatarButton
+              key={avatar.id}
+              dispatch={dispatch}
+              avatar={avatar}
+              appDataAvatar={appData?.editingData?.avatar}
+            />
+          ))}
+        </View>
       </View>
     </ScreenView>
   );
@@ -109,11 +204,8 @@ export default function setGoals() {
 
 const styles = StyleSheet.create({
   costumeAvatar: {
-    // width: "100%",
-    // height: "100%",
-    width: 173,
-    height: 173,
-    // backgroundColor: "white",
+    width: 110,
+    height: 110,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 173,
@@ -121,10 +213,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   avatarsContainer: {
-    flex: 0.7,
     flexDirection: "row",
-    flexWrap: "wrap",
-    marginTop: 20,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
@@ -135,8 +224,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-
-    // backgroundColor: "grey",
     gap: 30,
   },
   avatar: {

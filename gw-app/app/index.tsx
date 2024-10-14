@@ -1,4 +1,5 @@
 import { router, useNavigation } from "expo-router";
+import * as ScreenOrientation from "expo-screen-orientation";
 import { useContext, useEffect, useRef, useState } from "react";
 import {
   View,
@@ -19,9 +20,13 @@ import AnimatedView, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { User } from "./types/user.types";
-import { AppActionType, AppContext, AppDispatchContext } from "./_layout";
-import { urlHome, urlSchool } from "./constants/apiEndpoints";
+import {
+  AppActionType,
+  AppContext,
+  AppDispatchContext,
+} from "./context/appContext";
+import { User } from "./types/data.types";
+import { fetchUser } from "./constants/apiEndpoints";
 
 export default function Home() {
   const navigation = useNavigation();
@@ -42,6 +47,16 @@ export default function Home() {
       refLastname.current.focus();
     }
   };
+
+  async function changeScreenOrientation() {
+    await ScreenOrientation.lockAsync(
+      ScreenOrientation.OrientationLock.PORTRAIT_UP
+    );
+  }
+
+  useEffect(() => {
+    changeScreenOrientation();
+  }, []);
 
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
@@ -84,41 +99,21 @@ export default function Home() {
     }
     shrinkButton();
 
-    const userLogin: User = {
-      name: firstName,
+    const userLogin = {
+      firstName,
       lastName,
     };
-
-    try {
-      console.log(appData?.api + "/user", "api");
-      console.log(urlHome + "/user", "api");
-      const response = await fetch(appData?.api + "/user", {
-        method: "POST",
-        body: JSON.stringify(userLogin),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (!response.ok) {
-        console.log(response.status, "response status");
-        throw new Error(`Response status: ${response.status}`);
-      }
-
-      const user = await response.json();
-      console.log(user, "in index");
-      // setError(json.message);
-      if (!dispatch) return;
-      dispatch({
-        type: AppActionType.SET_USER,
-        payload: user.user,
-      });
-      router.navigate({
-        pathname: "/account",
-      });
-      return;
-    } catch (error: any) {
-      console.error(error.message);
-    }
+    console.log(appData?.api, "api");
+    await fetchUser({
+      url: appData?.api!,
+      userLogin,
+      dispatch: dispatch!,
+      navigateCallBack: () => {
+        router.navigate({
+          pathname: "/account",
+        });
+      },
+    });
   };
 
   return (
@@ -139,7 +134,6 @@ export default function Home() {
           <SafeAreaView>
             <KeyboardAvoidingView
               behavior={Platform.OS === "ios" ? "padding" : "height"}
-              // style={{ flex: 1 }}
             >
               <View style={styles.container}>
                 <Text style={{ fontSize: 30, fontWeight: "bold" }}>
@@ -265,7 +259,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     color: "black",
     borderWidth: 1,
-    borderColor: "#0A7E84",
+    borderColor: "black",
     backgroundColor: "white",
   },
   buttonContainer: {

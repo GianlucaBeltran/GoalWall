@@ -14,8 +14,8 @@ export default function CategoryTag({
       style={[
         styles.container,
         {
-          borderColor: selected ? "#0A7E84" : "",
-          borderWidth: selected ? 1 : 0,
+          borderColor: selected ? "black" : "white",
+          borderWidth: 1,
         },
       ]}
     >

@@ -1,10 +1,6 @@
-export interface Avatar {
-  id: string;
-  image: any;
-  fileName: string;
-}
+import { Avatar } from "../types/avatar.types";
 
-const Avatars = [
+const Avatars: Avatar[] = [
   {
     id: "0",
     image: require("../../assets/images/avatar1.png"),
@@ -44,7 +40,7 @@ const Avatars = [
 
 export default Avatars;
 
-export const getAvatar = (fileName: string): Avatar | null => {
+export const getAvatar = (fileName: string | undefined): Avatar | null => {
   const avatar = Avatars.find((avatar) => avatar.fileName === fileName);
   if (!avatar) return null;
   return avatar;

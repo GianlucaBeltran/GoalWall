@@ -1,6 +1,5 @@
 import { View, Text, StyleSheet } from "react-native";
 import ProfileSVG from "./svg/ProfileSVG";
-import GenderFemaleSVG from "./svg/GenderFemaleSVG";
 
 export default function AccountHeader({
   userName,
@@ -11,7 +10,6 @@ export default function AccountHeader({
   lastName: string;
   userUid: string;
 }) {
-  console.log(userName, lastName, userUid, "in header");
   return (
     <View style={styles.container}>
       <View style={styles.profileImage}>
