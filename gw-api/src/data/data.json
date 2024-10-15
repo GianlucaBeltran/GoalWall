@@ -789,6 +789,27 @@
       "avatarFileName": "",
       "goals": [],
       "reactions": []
+    },
+    {
+      "uid": "eaa146d6-4163-b515-1eb7a8319791akvfni",
+      "userNumber": 12,
+      "name": "Lightning",
+      "lastName": "McQueen",
+      "avatarFileName": "avatar7.png",
+      "goals": [
+        {
+          "description": "I want to be the fastest car in the world",
+          "createdAt": "2024-10-14T11:39:48.586Z",
+          "updatedAt": "2024-10-14T11:39:48.586Z",
+          "categories": [{ "id": "5", "name": "Mental health" }],
+          "id": "55b15668-6b25-4c23-9e07-04bdd5443928",
+          "comments": [],
+          "authorId": "eaa146d6-4163-b515-1eb7a8319791",
+          "reactions": []
+        }
+      ],
+      "reactions": [],
+      "chats": []
     }
   ]
 }
