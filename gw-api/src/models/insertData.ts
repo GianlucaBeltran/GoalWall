@@ -1,5 +1,6 @@
 import fs from "fs";
-import { Reaction, User } from "./api.types";
+import { v4 as uuidv4 } from "uuid";
+import { Chat, DirectMessage, Reaction, User } from "./api.types";
 import { goalFilePath } from "../constants/filePaths";
 import { findUserWithId } from "./readData";
 
@@ -102,4 +103,76 @@ export async function removeReaction(
 
   await writeData(goalFilePath, { users });
   return users;
+}
+
+export async function insertNewChat(
+  users: User[],
+  chat: Chat
+): Promise<User[]> {
+  chat.id = uuidv4();
+  console.log(chat, "chat");
+  const user1Id = chat.users[0].userId;
+  const user2Id = chat.users[1].userId;
+
+  const user1Index = users.findIndex((user) => {
+    return user.uid === user1Id;
+  });
+  const user2Index = users.findIndex((user) => {
+    return user.uid === user2Id;
+  });
+
+  users[user1Index].chats.push(chat);
+  users[user2Index].chats.push(chat);
+
+  await writeData(goalFilePath, { users });
+  return users;
+}
+
+export async function acceptChatRequest(
+  users: User[],
+  chatId: string,
+  message: DirectMessage
+): Promise<Chat> {
+  let chatResult: Chat | null = null;
+  console.log("acceptChatRequest", chatId, message);
+  for (let i = 0; i < users.length; i++) {
+    const chatIndex = users[i].chats.findIndex((chat) => {
+      console.log("chat", chatId, chat.id, chatId === chat.id);
+      return chatId === chat.id;
+    });
+    console.log("chatIndex", chatIndex);
+    if (chatIndex !== -1) {
+      users[i].chats[chatIndex].status = "accepted";
+      users[i].chats[chatIndex].messages.push(message);
+      chatResult = users[i].chats[chatIndex];
+    }
+  }
+  if (!chatResult) {
+    throw new Error("Chat not found");
+  }
+  await writeData(goalFilePath, { users });
+  return chatResult;
+}
+
+export async function insertMessage(
+  users: User[],
+  chatId: string,
+  message: DirectMessage
+): Promise<Chat> {
+  let chat: Chat | null = null;
+  for (let i = 0; i < users.length; i++) {
+    for (let j = 0; j < users[i].chats.length; j++) {
+      if (users[i].chats[j].id === chatId) {
+        users[i].chats[j].messages.push(message);
+        chat = users[i].chats[j];
+      }
+    }
+  }
+
+  if (!chat) {
+    throw new Error("Chat not found");
+  }
+
+  await writeData(goalFilePath, { users });
+  return chat;
 }

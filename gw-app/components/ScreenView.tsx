@@ -15,11 +15,15 @@ import ChevronLeftSVG from "@/components/svg/ChevronLeftSVG";
 export default function ScreenView({
   title,
   children,
+  itemRight,
   touchableWithoutFeedback = true,
+  edges = ["top"],
 }: {
   title: string;
   children: React.ReactNode;
+  itemRight?: React.ReactNode;
   touchableWithoutFeedback?: boolean;
+  edges?: ("top" | "right" | "bottom" | "left")[];
 }) {
   const navigation = useNavigation();
 
@@ -28,7 +32,7 @@ export default function ScreenView({
       source={require("../assets/images/background.png")}
       style={{ flex: 1 }}
     >
-      <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
+      <SafeAreaView style={{ flex: 1 }} edges={edges}>
         <TouchableWithoutFeedback
           style={{ flex: 1 }}
           onPress={() => {
@@ -60,7 +64,7 @@ export default function ScreenView({
                 <ChevronLeftSVG />
               </TouchableOpacity>
               <Text style={{ fontSize: 16, fontWeight: 500 }}>{title}</Text>
-              <View style={{ width: 24, height: 24 }} />
+              <View style={{ width: 24, height: 24 }}>{itemRight}</View>
             </View>
             {children}
           </View>

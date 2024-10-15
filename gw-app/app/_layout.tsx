@@ -5,12 +5,12 @@ import {
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { Stack } from "expo-router";
-import { User, Goal, Comment } from "./types/data.types";
+import { Stack, usePathname } from "expo-router";
+import { User, Goal, Comment, Chat } from "./types/data.types";
 import { ImageSourcePropType } from "react-native";
 import { urlHome, urlNgrok, urlSchool } from "./constants/apiEndpoints";
 import NetInfo from "@react-native-community/netinfo";
@@ -21,14 +21,22 @@ import {
   AppContext,
   appDataReducer,
   AppDispatchContext,
+  ChatData,
 } from "./context/appContext";
 import sharedGoals from "./othersGoals";
+import { Host } from "react-native-portalize";
+import PortalViewNotifications from "@/components/PortalViewNotifications";
+import { Socket } from "socket.io-client";
+import { connectSocket } from "./helpers/socket";
+import { constructMessageDispatch } from "./helpers/chatHelpers";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const pathName = usePathname();
+
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
@@ -40,35 +48,150 @@ export default function RootLayout() {
     isLoading: false,
     sharedGoals: [],
     myGoals: [],
+    currentChat: null,
+    notifications: [],
+    chats: [],
   });
-
-  // useEffect(() => {
-  //   (async () => {
-  //     let { status } = await Location.requestForegroundPermissionsAsync();
-  //     if (status !== "granted") {
-  //       console.log("Permission to access location was denied");
-  //       return;
-  //     }
-
-  //     // const ipAddress = (await NetInfo.fetch()).details?.ipAddress;
-  //     // console.log(ipAddress, "apiAdress");
-  //     // dispatch({
-  //     //   type: AppActionType.SET_API,
-  //     //   payload: ipAddress.split(".")[0] === "192" ? urlHome : urlSchool,
-  //     // });
-
-  //     // dispatch({
-  //     //   type: AppActionType.SET_API,
-  //     //   payload: urlHome,
-  //     // });
-  //   })();
-  // }, []);
 
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  useEffect(() => {
+    if (!appData?.user || !dispatch) return;
+
+    console.log("setting socket");
+
+    const socket = connectSocket(appData?.user?.uid);
+    dispatch({
+      type: AppActionType.SET_SOCKET,
+      payload: socket,
+    });
+
+    console.log("setting socket done", socket.connected);
+
+    return () => {
+      socket.disconnect();
+      dispatch!({
+        type: AppActionType.SET_CURRENT_CHAT,
+        payload: null,
+      });
+    };
+  }, [appData?.user]);
+
+  useEffect(() => {
+    if (!appData || !appData.socket) return;
+
+    function onConnect() {
+      console.log("connected");
+    }
+
+    function onMessage(data: Chat) {
+      console.log(pathName);
+      if (!appData || !appData.user) return;
+      console.log("message recieved");
+      if (pathName !== "/chat") {
+        console.log("pushing notification");
+        dispatch!({
+          type: AppActionType.PUSH_NOTIFICATION,
+          payload: {
+            id: new Date().getTime().toString(),
+            data: data.messages[data.messages.length - 1].message,
+            type: "message",
+          },
+        });
+      } else {
+        dispatch({
+          type: AppActionType.SET_CURRENT_CHAT,
+          payload: constructMessageDispatch(data, appData.user.uid),
+        });
+      }
+    }
+
+    function onMessageRequestRecieved(data: Chat) {
+      if (!appData || !appData.user) return;
+
+      if (pathName === "/chat") {
+        dispatch!({
+          type: AppActionType.PUSH_NOTIFICATION,
+          payload: {
+            id: new Date().getTime().toString(),
+            data: data.messages[data.messages.length - 1].message,
+            type: "messageRequest",
+          },
+        });
+      } else {
+        dispatch!({
+          type: AppActionType.SET_CURRENT_CHAT,
+          payload: constructMessageDispatch(data, appData.user.uid),
+        });
+      }
+    }
+
+    function onMessageRequestAccepted(data: Chat) {
+      if (!appData || !appData.user) return;
+      if (pathName === "/chat") {
+        dispatch!({
+          type: AppActionType.PUSH_NOTIFICATION,
+          payload: {
+            id: new Date().getTime().toString(),
+            data: data.messages[0].message,
+            type: "messageRequestAccepted",
+          },
+        });
+      } else {
+        dispatch!({
+          type: AppActionType.SET_CURRENT_CHAT,
+          payload: constructMessageDispatch(data, appData.user.uid),
+        });
+      }
+    }
+
+    async function onFetchChats() {
+      if (!appData || !appData.user) return;
+      console.log("fetching chats");
+      try {
+        const response = await fetch(
+          appData.api + "/messages/" + appData.user?.uid,
+          {
+            method: "get",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const data = await response.json();
+        if (!data.messages) return;
+        const sortedMessages = data.messages.sort((a: Chat, b: Chat) => {
+          return (
+            new Date(b.messages[b.messages.length - 1].createdAt).getTime() -
+            new Date(a.messages[a.messages.length - 1].createdAt).getTime()
+          );
+        });
+        dispatch!({
+          type: AppActionType.SET_CHATS,
+          payload: sortedMessages,
+        });
+      } catch (error) {
+        console.log(error, "error");
+      }
+    }
+
+    appData.socket.on("message", onMessage);
+    appData.socket.on("messageRequestRecieved", onMessageRequestRecieved);
+    appData.socket.on("messageRequestAccepted", onMessageRequestAccepted);
+    appData.socket.on("fetchChats", onFetchChats);
+
+    return () => {
+      if (!appData?.socket) return;
+      appData.socket.off("message", onMessage);
+      appData.socket.off("messageRequestRecieved", onMessageRequestRecieved);
+      appData.socket.off("messageRequestAccepted", onMessageRequestAccepted);
+      appData.socket.off("fetchChats", onFetchChats);
+    };
+  }, [appData?.currentChat, appData?.socket, pathName]);
 
   if (!loaded) {
     return null;
@@ -77,21 +200,26 @@ export default function RootLayout() {
   return (
     <AppContext.Provider value={appData}>
       <AppDispatchContext.Provider value={dispatch}>
-        <ThemeProvider
-          value={colorScheme === "light" ? DarkTheme : DefaultTheme}
-        >
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="account" />
-            <Stack.Screen name="mainMenu" />
-            <Stack.Screen name="goalWall" />
-            <Stack.Screen name="writeGoal" />
-            <Stack.Screen name="avatar" />
-            <Stack.Screen name="sharedGoals" />
-            <Stack.Screen name="othersGoals" />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-        </ThemeProvider>
+        <Host>
+          <ThemeProvider
+            value={colorScheme === "light" ? DarkTheme : DefaultTheme}
+          >
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="index" />
+              <Stack.Screen name="account" />
+              <Stack.Screen name="mainMenu" />
+              <Stack.Screen name="goalWall" />
+              <Stack.Screen name="writeGoal" />
+              <Stack.Screen name="avatar" />
+              <Stack.Screen name="sharedGoals" />
+              <Stack.Screen name="othersGoals" />
+              <Stack.Screen name="messages" />
+              <Stack.Screen name="chat" />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+          </ThemeProvider>
+          <PortalViewNotifications />
+        </Host>
       </AppDispatchContext.Provider>
     </AppContext.Provider>
   );

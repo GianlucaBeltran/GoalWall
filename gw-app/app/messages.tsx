@@ -18,7 +18,7 @@ import {
   AppContext,
   AppDispatchContext,
 } from "./context/appContext";
-import { Goal, SelectedItem } from "./types/data.types";
+import { Chat, SelectedItem } from "./types/data.types";
 import { Host } from "react-native-portalize";
 import PortalViewPosts from "@/components/PortalViewPosts";
 import Post from "@/components/Post";
@@ -26,12 +26,15 @@ import SearchSVG from "@/components/svg/SearchSVG";
 import SortSVG from "@/components/svg/SortSVG";
 import CloseSVG from "@/components/svg/CloseSVG";
 import PortalViewReply from "@/components/PortalViewReply";
+import ChatComponent from "@/components/ChatComponent";
+import InboxSVG from "@/components/svg/InboxSVG";
 
-export default function sharedGoals() {
+export default function messages() {
   const [itemCoordinates, setItemCoordinates] = useState({ x: 0, y: 0 });
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
   // const [othersGoals, setOtherGoals] = useState<Goal[] | null>(null);
-  const [filteredGoals, setFilteredGoals] = useState<Goal[] | null>(null);
+  const [messages, setMessages] = useState<Chat[] | null>(null);
+  const [filteredMessages, setfilteredMessages] = useState<Chat[] | null>(null);
   const [search, setSearch] = useState("");
   const [replying, setReplying] = useState<SelectedItem | null>(null);
 
@@ -65,24 +68,27 @@ export default function sharedGoals() {
 
     (async () => {
       try {
-        const response = await fetch(appData.api + "/goals", {
-          method: "POST",
-          body: JSON.stringify({ userId: appData.user?.uid }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(
+          appData.api + "/messages/" + appData.user?.uid,
+          {
+            method: "get",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
         const data = await response.json();
-        if (!data.goals) return;
-        const sortedGoals = data.goals.sort((a: Goal, b: Goal) => {
+        if (!data.messages) return;
+        const sortedMessages = data.messages.sort((a: Chat, b: Chat) => {
           return (
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            new Date(b.messages[b.messages.length - 1].createdAt).getTime() -
+            new Date(a.messages[a.messages.length - 1].createdAt).getTime()
           );
         });
-
+        console.log(sortedMessages, "sortedMessages");
         dispatch({
-          type: AppActionType.SET_SHARED_GOALS,
-          payload: sortedGoals,
+          type: AppActionType.SET_CHATS,
+          payload: sortedMessages,
         });
       } catch (error) {
         console.log(error, "error");
@@ -92,19 +98,22 @@ export default function sharedGoals() {
 
   useEffect(() => {
     if (!search) return;
+    if (!messages) return;
 
-    const filteredGoals = appData?.sharedGoals.filter((goal) => {
-      return goal.description.toLowerCase().includes(search.toLowerCase());
+    const filteredMessages = messages.filter((message) => {
+      return message.messages.some((msg) =>
+        msg.message.toLowerCase().includes(search.toLowerCase())
+      );
     });
 
-    setFilteredGoals(filteredGoals || []);
+    setfilteredMessages(filteredMessages || []);
   }, [search]);
 
   return (
     <Host>
-      <ScreenView title="Other members’ goals" touchableWithoutFeedback={false}>
+      <ScreenView title="Inbox" touchableWithoutFeedback={false}>
         <View style={{ flex: 1 }}>
-          {appData?.sharedGoals?.length === 0 ? (
+          {appData?.chats?.length === 0 ? (
             <View
               style={{
                 flex: 1,
@@ -120,11 +129,10 @@ export default function sharedGoals() {
                     marginBottom: 20,
                   }}
                 >
-                  <ExclamationSVG />
-                  <GoalSVG width={92} height={92} />
+                  <InboxSVG width={92} height={92} />
                 </View>
                 <Text style={{ fontSize: 16, fontWeight: 500 }}>
-                  No other members’ have shared goals yet
+                  You have no messages
                 </Text>
               </View>
             </View>
@@ -180,7 +188,7 @@ export default function sharedGoals() {
                       if (Keyboard.isVisible()) {
                         Keyboard.dismiss();
                       }
-                      setFilteredGoals(null);
+                      setfilteredMessages(null);
                       setSearch("");
                       return;
                     }
@@ -204,7 +212,7 @@ export default function sharedGoals() {
                   )}
                 </TouchableOpacity>
               </View>
-              {search && filteredGoals && filteredGoals.length === 0 && (
+              {search && filteredMessages && filteredMessages.length === 0 && (
                 <View
                   style={{
                     flex: 1,
@@ -218,20 +226,15 @@ export default function sharedGoals() {
                 </View>
               )}
               <FlatList
-                data={search ? filteredGoals : appData?.sharedGoals}
-                renderItem={({ item }) => (
-                  <Post
-                    postData={{
-                      data: item,
-                      type: "goal",
-                      owned: false,
-                    }}
-                    appData={appData!}
-                    onLongPress={onLongPress}
-                    onReply={onReply}
-                    origin="othersGoals"
+                data={search ? filteredMessages : appData?.chats}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item, index }) => (
+                  <ChatComponent
+                    chat={item}
+                    otherIndex={appData?.user?.uid === item.creatorId ? 1 : 0}
                   />
                 )}
+                bounces={false}
               />
             </View>
           )}

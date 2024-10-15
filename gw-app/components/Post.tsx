@@ -1,7 +1,18 @@
-import { AppData } from "@/app/context/appContext";
+import {
+  AppActionType,
+  AppData,
+  AppDispatchContext,
+  ChatData,
+} from "@/app/context/appContext";
 import { formatedDate } from "@/app/helpers/dateFormating";
-import { Comment, Goal, Reaction, SelectedItem } from "@/app/types/data.types";
-import { useEffect, useState } from "react";
+import {
+  Chat,
+  Comment,
+  Goal,
+  Reaction,
+  SelectedItem,
+} from "@/app/types/data.types";
+import { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,6 +23,7 @@ import * as Haptics from "expo-haptics";
 import AvatarImage from "./AvatarImage";
 import { getAvatar } from "@/app/constants/avatars";
 import ReactionSVG from "./svg/ReactionSVG";
+import { router } from "expo-router";
 
 export default function Post({
   postData,
@@ -28,6 +40,7 @@ export default function Post({
 }) {
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
+  const dispatch = useContext(AppDispatchContext);
 
   const handleViewComments = async () => {
     if (showComments) {
@@ -103,6 +116,44 @@ export default function Post({
 
   const postReactions = new Set(postData.data.reactions?.map((r) => r.type));
 
+  const checkIfHasChat = () => {
+    if (!appData) return -1;
+
+    return appData.user?.chats.findIndex((chat) =>
+      chat.users[0].userId === appData.user?.uid &&
+      chat.users[1].userId === postData.data.authorId
+        ? chat
+        : chat.users[0].userId === postData.data.authorId &&
+          chat.users[1].userId === appData.user?.uid
+        ? chat
+        : null
+    );
+  };
+
+  const getOtherUserInfo = () => {
+    if (!appData) return;
+
+    const chat = checkIfHasChat();
+
+    if (chat !== -1 && chat !== undefined) {
+      return {
+        otherUserId: appData?.user?.chats[chat].users.filter(
+          (user) => user.userId !== appData.user?.uid
+        )[0].userId,
+        otherUserName: appData?.user?.chats[chat].users.filter(
+          (user) => user.userId !== appData.user?.uid
+        )[0].userName,
+        otherUserLastName: appData?.user?.chats[chat].users.filter(
+          (user) => user.userId !== appData.user?.uid
+        )[0].userLastName,
+        otherUserAvatar:
+          appData?.user?.chats[chat].users.filter(
+            (user) => user.userId !== appData.user?.uid
+          )[0].userAvatarFileName || "",
+      };
+    }
+  };
+
   return (
     <View
       style={{
@@ -123,11 +174,72 @@ export default function Post({
         onLongPress={(e) => handleLongPress(e)}
         disabled={!onLongPress}
       >
-        <AvatarImage
-          size={postData.type === "goal" ? 39 : 30}
-          avatarImage={getAvatar(postData.data.avatarFileName)?.image}
-          withShadow={false}
-        />
+        <TouchableOpacity
+          onPress={() => {
+            if (!dispatch) return;
+
+            const chat = checkIfHasChat();
+
+            if (chat === -1) {
+              const newChat: Chat = {
+                id: "",
+                creatorId: appData?.user?.uid!,
+                status: "new",
+                createdAt: new Date().toISOString(),
+                users: [
+                  {
+                    userId: appData?.user?.uid!,
+                    userName: appData?.user?.name!,
+                    userLastName: appData?.user?.lastName!,
+                    userAvatarFileName: appData?.user?.avatarFileName!,
+                  },
+                  {
+                    userId: postData.data.authorId,
+                    userName: "",
+                    userLastName: "",
+                    userAvatarFileName: postData.data.avatarFileName || "",
+                  },
+                ],
+                messages: [],
+              };
+
+              dispatch({
+                type: AppActionType.SET_CURRENT_CHAT,
+                payload: {
+                  chat: newChat,
+                  otherUserId: postData.data.authorId,
+                  otherUserName: "",
+                  otherUserLastName: "",
+                  otherUserAvatar: postData.data.avatarFileName || "",
+                },
+              });
+
+              router.navigate("/chat");
+            } else if (chat !== -1 && chat !== undefined) {
+              const otherUser = getOtherUserInfo();
+              const chatData: ChatData = {
+                chat: appData?.user?.chats[chat]!,
+                otherUserId: otherUser?.otherUserId || "",
+                otherUserName: otherUser?.otherUserName || "",
+                otherUserLastName: otherUser?.otherUserLastName || "",
+                otherUserAvatar: otherUser?.otherUserAvatar || "",
+              };
+
+              dispatch({
+                type: AppActionType.SET_CURRENT_CHAT,
+                payload: chatData,
+              });
+
+              router.navigate("/chat");
+            }
+          }}
+        >
+          <AvatarImage
+            size={postData.type === "goal" ? 39 : 30}
+            avatarImage={getAvatar(postData.data.avatarFileName)?.image}
+            withShadow={false}
+          />
+        </TouchableOpacity>
         <View style={{ flex: 1, justifyContent: "space-between", gap: 3 }}>
           <View>
             <Text

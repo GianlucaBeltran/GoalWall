@@ -1,14 +1,29 @@
 import express from "express";
-import { User, Goal, Comment, Reaction } from "./models/api.types";
+import {
+  User,
+  Goal,
+  Comment,
+  Reaction,
+  Chat,
+  DirectMessage,
+} from "./models/api.types";
 import {
   checkIfGoalExists,
+  findChatById,
   findPostById,
   findUser,
   findUserWithId,
   getAllGoals,
   readFile,
 } from "./models/readData";
-import { removeReaction, setReaction, writeData } from "./models/insertData";
+import {
+  acceptChatRequest,
+  insertMessage,
+  insertNewChat,
+  removeReaction,
+  setReaction,
+  writeData,
+} from "./models/insertData";
 import { goalFilePath } from "./constants/filePaths";
 import { v4 as uuidv4 } from "uuid";
 import { Server } from "socket.io";
@@ -25,6 +40,63 @@ const io = new Server(httpServer, {
 });
 
 const port = 3000;
+
+io.on("connection", (socket) => {
+  console.log("a user connected");
+  socket.data = { userId: socket.handshake.auth.userId };
+  socket.join(socket.handshake.auth.userId);
+  console.log("User joined room", socket.handshake.auth.userId);
+
+  socket.on("messageRequest", async (chat: { chat: Chat }) => {
+    const userJson = await readFile<{ users: User[] }>(goalFilePath);
+
+    await insertNewChat(userJson.users, chat.chat);
+    const otherUser =
+      chat.chat.users[0].userId === chat.chat.creatorId
+        ? chat.chat.users[1]
+        : chat.chat.users[0];
+    console.log("Emitting message request to ", otherUser);
+    socket.emit("message", chat.chat);
+    io.to(otherUser.userId).emit("messageRequestRecieved", chat.chat);
+    io.emit("fetchChats");
+  });
+
+  socket.on(
+    "messageRequestAccepted",
+    async ({ chatId, message }: { chatId: string; message: DirectMessage }) => {
+      const userJson = await readFile<{ users: User[] }>(goalFilePath);
+      console.log("messageRequestAccepted", chatId, message);
+      const chat = await acceptChatRequest(userJson.users, chatId, message);
+      console.log("Emitting message request accepted to ", chat);
+      io.to(chat.creatorId).emit("messageRequestAccepted", chat);
+      io.emit("fetchChats");
+    }
+  );
+
+  socket.on(
+    "message",
+    async ({ chatId, message }: { chatId: string; message: DirectMessage }) => {
+      const userJson = await readFile<{ users: User[] }>(goalFilePath);
+      console.log("message", chatId, message);
+      const chat = await insertMessage(userJson.users, chatId, message);
+      const otherUser = chat.users.find(
+        (user) => user.userId !== chat.creatorId
+      );
+      console.log(
+        "Emitting message to ",
+        otherUser.userId,
+        " and ",
+        chat.creatorId
+      );
+      io.to([chat.creatorId, otherUser.userId]).emit("message", chat);
+      io.emit("fetchChats");
+    }
+  );
+
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+  });
+});
 
 app.post("/user", async (req, res) => {
   const userFromRequest: { firstName: string; lastName: string } = req.body;
@@ -50,7 +122,7 @@ app.post("/user", async (req, res) => {
     avatarFileName: "",
     goals: [],
     reactions: [],
-    messages: [],
+    chats: [],
   };
 
   userJson.users.push(newUser);
@@ -80,6 +152,46 @@ app.get("/user/:id", async (req, res) => {
       message: "User not found",
     });
   }
+});
+
+app.get("/messages/:userId", async (req, res) => {
+  const userId: string = req.params.userId;
+  console.log(
+    "Recieved request for messages from app for user with id ",
+    userId
+  );
+
+  const userJson = await readFile<{ users: User[] }>(goalFilePath);
+
+  const userFromData = findUserWithId(userJson.users, userId);
+  console.log(userFromData ? "User found" : "User not found");
+
+  if (!userFromData) {
+    res.send({
+      message: "User not found",
+    });
+    return;
+  }
+  for (const chat of userFromData.chats) {
+    for (const user of chat.users) {
+      if (user.userId !== userId) {
+        const otherUser = findUserWithId(userJson.users, user.userId);
+        console.log(otherUser.name, otherUser.lastName, "otherUser");
+        user.userName = otherUser.name;
+        user.userLastName = otherUser.lastName;
+        user.userAvatarFileName = otherUser.avatarFileName;
+      } else {
+        user.userName = userFromData.name;
+        user.userLastName = userFromData.lastName;
+        user.userAvatarFileName = userFromData.avatarFileName;
+      }
+    }
+  }
+
+  res.send({
+    messages: userFromData.chats,
+  });
+  console.log("Messages sent");
 });
 
 app.post("/setAvatar/:userId", async (req, res) => {
@@ -151,17 +263,17 @@ app.post("/goal", async (req, res) => {
     return;
   }
 
-  if (shouldAddComment) {
-    goal.comments.push({
-      id: uuidv4(),
-      avatarFileName: userJson.users[userJson.users.length - 1].avatarFileName,
-      authorId: userJson.users[userJson.users.length - 1].uid,
-      description: "Great goal!",
-      createdAt: new Date().toISOString(),
-      goalId: goal.id,
-      reactions: [],
-    });
-  }
+  // if (shouldAddComment) {
+  //   goal.comments.push({
+  //     id: uuidv4(),
+  //     avatarFileName: userJson.users[userJson.users.length - 1].avatarFileName,
+  //     authorId: userJson.users[userJson.users.length - 1].uid,
+  //     description: "Great goal!",
+  //     createdAt: new Date().toISOString(),
+  //     goalId: goal.id,
+  //     reactions: [],
+  //   });
+  // }
 
   if (avatarFileName) {
     userFromData.avatarFileName = avatarFileName;
@@ -252,6 +364,9 @@ app.get("/allGoals", async (req, res) => {
 
   for (const goal of allGoals) {
     const goalAuthor = findUserWithId(userJson.users, goal.authorId);
+    if (!goalAuthor) {
+      continue;
+    }
     goal.avatarFileName = goalAuthor.avatarFileName;
   }
 
@@ -424,6 +539,6 @@ app.delete("/reaction", async (req, res) => {
   });
 });
 
-app.listen(port, () => {
+httpServer.listen(port, () => {
   return console.log(`Express is listening at http://localhost:${port}`);
 });

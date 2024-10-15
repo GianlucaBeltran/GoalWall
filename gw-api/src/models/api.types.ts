@@ -6,6 +6,20 @@ export interface DirectMessage {
   createdAt: string;
 }
 
+export interface Chat {
+  id: string;
+  creatorId: string;
+  users: {
+    userId: string;
+    userName: string;
+    userLastName: string;
+    userAvatarFileName: string;
+  }[];
+  messages: DirectMessage[];
+  status: "accepted" | "pending" | "rejected" | "new";
+  createdAt: string;
+}
+
 export interface Reaction {
   authorId: string;
   postId: string;
@@ -42,5 +56,5 @@ export interface User {
   avatarFileName: string;
   goals: Goal[];
   reactions: Reaction[];
-  messages: DirectMessage[];
+  chats: Chat[];
 }

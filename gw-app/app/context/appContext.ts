@@ -1,10 +1,19 @@
 import { createContext, useContext } from "react";
 import { Avatar } from "../types/avatar.types";
-import { Goal, User } from "../types/data.types";
+import { Chat, Goal, User, Notification } from "../types/data.types";
+import { Socket } from "socket.io-client";
 
 interface EditingData {
   goal?: Goal | null;
   avatar?: Avatar | null;
+}
+
+export interface ChatData {
+  chat: Chat;
+  otherUserId: string;
+  otherUserName: string;
+  otherUserLastName: string;
+  otherUserAvatar: string;
 }
 
 export interface AppData {
@@ -14,6 +23,10 @@ export interface AppData {
   editingData: EditingData | null;
   api: string;
   isLoading: boolean;
+  chats: Chat[];
+  notifications: Notification[];
+  socket?: Socket;
+  currentChat: ChatData | null;
 }
 
 export enum AppActionType {
@@ -25,6 +38,11 @@ export enum AppActionType {
   RESET_EDITING,
   SET_API,
   SET_LOADING,
+  SET_CURRENT_CHAT,
+  SET_CHATS,
+  PUSH_NOTIFICATION,
+  POP_NOTIFICATION,
+  SET_SOCKET,
 }
 
 export interface AppAction {
@@ -37,7 +55,11 @@ export interface AppAction {
     | boolean
     | string
     | null
-    | EditingData;
+    | EditingData
+    | ChatData
+    | Notification
+    | Chat[]
+    | Socket;
 }
 
 export const AppContext = createContext<AppData | null>(null);
@@ -84,6 +106,25 @@ export function appDataReducer(appData: AppData, action: AppAction): AppData {
       return { ...appData, api: action.payload as string };
     case AppActionType.SET_LOADING:
       return { ...appData, isLoading: action.payload as boolean };
+    case AppActionType.SET_CURRENT_CHAT:
+      return { ...appData, currentChat: action.payload as ChatData };
+    case AppActionType.SET_CHATS:
+      return { ...appData, chats: action.payload as Chat[] };
+    case AppActionType.PUSH_NOTIFICATION:
+      return {
+        ...appData,
+        notifications: [
+          ...appData.notifications,
+          action.payload as Notification,
+        ],
+      };
+    case AppActionType.POP_NOTIFICATION:
+      return {
+        ...appData,
+        notifications: appData.notifications.slice(1),
+      };
+    case AppActionType.SET_SOCKET:
+      return { ...appData, socket: action.payload as Socket };
     default:
       return appData;
   }

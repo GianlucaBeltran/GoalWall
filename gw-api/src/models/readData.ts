@@ -74,3 +74,14 @@ export function findPostById(authorId: string, postId: string, users: User[]) {
   }
   return null;
 }
+
+export function findChatById(chatId: string, users: User[]) {
+  for (let i = 0; i < users.length; i++) {
+    for (let j = 0; j < users[i].chats.length; j++) {
+      if (users[i].chats[j].id === chatId) {
+        return users[i].chats[j];
+      }
+    }
+  }
+  return null;
+}

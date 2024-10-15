@@ -24,12 +24,19 @@ import EditSVG from "./svg/EditSVG";
 import CloseSVG from "./svg/CloseSVG";
 import SendSVG from "./svg/SendSVG";
 import ExclamationSVG from "./svg/ExclamationSVG";
-import { Comment, Goal, Reaction, SelectedItem } from "@/app/types/data.types";
+import {
+  Chat,
+  Comment,
+  Goal,
+  Reaction,
+  SelectedItem,
+} from "@/app/types/data.types";
 import { router } from "expo-router";
 import {
   AppActionType,
   AppContext,
   AppDispatchContext,
+  ChatData,
 } from "@/app/context/appContext";
 
 const reactionOptions: { id: string; icon: "❤️" | "👏" | "💪" | "🔥" }[] = [
@@ -227,6 +234,44 @@ export default function PortalViewPost({
     );
   };
 
+  const checkIfHasChat = () => {
+    if (!appData) return -1;
+
+    return appData.user?.chats.findIndex((chat) =>
+      chat.users[0].userId === appData.user?.uid &&
+      chat.users[1].userId === selectedItem?.item.authorId
+        ? chat
+        : chat.users[0].userId === selectedItem?.item.authorId &&
+          chat.users[1].userId === appData.user?.uid
+        ? chat
+        : null
+    );
+  };
+
+  const getOtherUserInfo = () => {
+    if (!appData) return;
+
+    const chat = checkIfHasChat();
+
+    if (chat !== -1 && chat !== undefined) {
+      return {
+        otherUserId: appData?.user?.chats[chat].users.filter(
+          (user) => user.userId !== appData.user?.uid
+        )[0].userId,
+        otherUserName: appData?.user?.chats[chat].users.filter(
+          (user) => user.userId !== appData.user?.uid
+        )[0].userName,
+        otherUserLastName: appData?.user?.chats[chat].users.filter(
+          (user) => user.userId !== appData.user?.uid
+        )[0].userLastName,
+        otherUserAvatar:
+          appData?.user?.chats[chat].users.filter(
+            (user) => user.userId !== appData.user?.uid
+          )[0].userAvatarFileName || "",
+      };
+    }
+  };
+
   return (
     <>
       {selectedItem && (
@@ -360,7 +405,69 @@ export default function PortalViewPost({
                         <TouchableOpacity
                           key={action.title}
                           onPress={() => {
-                            console.log("Action", action.title);
+                            if (action.title === "Send message request") {
+                              if (!dispatch) return;
+
+                              const chat = checkIfHasChat();
+
+                              if (chat === -1) {
+                                const newChat: Chat = {
+                                  id: "",
+                                  creatorId: appData?.user?.uid!,
+                                  status: "new",
+                                  createdAt: new Date().toISOString(),
+                                  users: [
+                                    {
+                                      userId: appData?.user?.uid!,
+                                      userName: appData?.user?.name!,
+                                      userLastName: appData?.user?.lastName!,
+                                      userAvatarFileName:
+                                        appData?.user?.avatarFileName!,
+                                    },
+                                    {
+                                      userId: selectedItem.item.authorId,
+                                      userName: "",
+                                      userLastName: "",
+                                      userAvatarFileName:
+                                        selectedItem.avatarFileName || "",
+                                    },
+                                  ],
+                                  messages: [],
+                                };
+
+                                dispatch({
+                                  type: AppActionType.SET_CURRENT_CHAT,
+                                  payload: {
+                                    chat: newChat,
+                                    otherUserId: selectedItem.item.authorId,
+                                    otherUserName: "",
+                                    otherUserLastName: "",
+                                    otherUserAvatar:
+                                      selectedItem.avatarFileName || "",
+                                  },
+                                });
+
+                                router.navigate("/chat");
+                              } else if (chat !== -1 && chat !== undefined) {
+                                const otherUser = getOtherUserInfo();
+                                const chatData: ChatData = {
+                                  chat: appData?.user?.chats[chat]!,
+                                  otherUserId: otherUser?.otherUserId || "",
+                                  otherUserName: otherUser?.otherUserName || "",
+                                  otherUserLastName:
+                                    otherUser?.otherUserLastName || "",
+                                  otherUserAvatar:
+                                    otherUser?.otherUserAvatar || "",
+                                };
+
+                                dispatch({
+                                  type: AppActionType.SET_CURRENT_CHAT,
+                                  payload: chatData,
+                                });
+
+                                router.navigate("/chat");
+                              }
+                            }
                           }}
                           style={{
                             flexDirection: "row",
@@ -370,7 +477,9 @@ export default function PortalViewPost({
                           }}
                         >
                           <Text style={{ fontSize: 18, color: action.tint }}>
-                            {action.title}
+                            {checkIfHasChat() !== -1
+                              ? "Open chat"
+                              : action.title}
                           </Text>
 
                           {action.icon}

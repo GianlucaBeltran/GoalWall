@@ -6,6 +6,20 @@ export interface DirectMessage {
   createdAt: string;
 }
 
+export interface Chat {
+  id: string;
+  creatorId: string;
+  users: {
+    userId: string;
+    userName: string;
+    userLastName: string;
+    userAvatarFileName: string;
+  }[];
+  messages: DirectMessage[];
+  status: "accepted" | "pending" | "rejected" | "new";
+  createdAt: string;
+}
+
 export interface Reaction {
   authorId: string;
   postId: string;
@@ -47,7 +61,7 @@ export interface User {
   goals: Goal[];
   comments: Comment[];
   reactions: Reaction[];
-  messages: DirectMessage[];
+  chats: Chat[];
 }
 
 export interface SelectedItem {
@@ -59,4 +73,15 @@ export interface SelectedItem {
   parentGoalId?: string;
   parentGoal?: Goal;
   origin: "sharedGoals" | "othersGoals" | "goalWall";
+}
+
+export interface Notification {
+  id: string;
+  type:
+    | "reaction"
+    | "comment"
+    | "messageRequest"
+    | "message"
+    | "messageRequestAccepted";
+  data: any;
 }

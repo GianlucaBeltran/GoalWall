@@ -3,8 +3,8 @@ import { AppAction, AppActionType } from "../context/appContext";
 import { User } from "../types/data.types";
 
 export const urlSchool = "http://130.229.135.156:3000";
-export const urlHome = "http://192.168.0.218:3000";
-export const urlNgrok = "https://5e8f-84-55-72-146.ngrok-free.app";
+export const urlHome = "http://192.168.0.198:3000";
+export const urlNgrok = "https://b74a-84-55-72-146.ngrok-free.app";
 
 export async function fetchUser({
   url,
