@@ -16,6 +16,32 @@
           "comments": [],
           "authorId": "ddbde96a-19ed-47d2-9fd6-085e35692a5e",
           "reactions": []
+        },
+        {
+          "description": "I want to do a handstand",
+          "createdAt": "2024-10-16T09:47:50.784Z",
+          "updatedAt": "2024-10-16T09:47:50.784Z",
+          "categories": [],
+          "id": "ab589c6a-ec48-43c0-a7ff-2fe57dd47770",
+          "comments": [
+            {
+              "id": "6f3b8106-5fc7-4786-ae27-51aa5c28b62a",
+              "goalId": "ab589c6a-ec48-43c0-a7ff-2fe57dd47770",
+              "authorId": "aad006c7-f2f0-45f8-ae00-c15dbb90e0d7",
+              "description": "Looking forward to see the results brother!",
+              "createdAt": "2024-10-16T09:56:12.504Z",
+              "avatarFileName": "avatar2.png",
+              "reactions": []
+            }
+          ],
+          "authorId": "ddbde96a-19ed-47d2-9fd6-085e35692a5e",
+          "reactions": [
+            {
+              "authorId": "aad006c7-f2f0-45f8-ae00-c15dbb90e0d7",
+              "postId": "ab589c6a-ec48-43c0-a7ff-2fe57dd47770",
+              "type": "🔥"
+            }
+          ]
         }
       ],
       "reactions": [
@@ -23,6 +49,11 @@
           "authorId": "ddbde96a-19ed-47d2-9fd6-085e35692a5e",
           "postId": "f7d8c3ed-066f-468c-a65c-c4b5183d696b",
           "type": "🔥"
+        },
+        {
+          "authorId": "ddbde96a-19ed-47d2-9fd6-085e35692a5e",
+          "postId": "f7d8c3ed-066f-468c-a65c-c4b5183d696b",
+          "type": "👏"
         }
       ],
       "chats": [
@@ -106,6 +137,11 @@
               "authorId": "ddbde96a-19ed-47d2-9fd6-085e35692a5e",
               "postId": "f7d8c3ed-066f-468c-a65c-c4b5183d696b",
               "type": "🔥"
+            },
+            {
+              "authorId": "ddbde96a-19ed-47d2-9fd6-085e35692a5e",
+              "postId": "f7d8c3ed-066f-468c-a65c-c4b5183d696b",
+              "type": "👏"
             }
           ]
         }
@@ -159,8 +195,109 @@
               "createdAt": "2024-10-15T19:15:34.185Z"
             }
           ]
+        },
+        {
+          "id": "1550e1b8-70de-400a-9b7f-24a224243d06",
+          "creatorId": "aad006c7-f2f0-45f8-ae00-c15dbb90e0d7",
+          "status": "accepted",
+          "createdAt": "2024-10-16T09:58:10.701Z",
+          "users": [
+            {
+              "userId": "aad006c7-f2f0-45f8-ae00-c15dbb90e0d7",
+              "userName": "Stefan",
+              "userLastName": "Monkey",
+              "userAvatarFileName": "avatar2.png"
+            },
+            {
+              "userId": "5422db80-d281-4be6-94dc-4870aee3bb6a",
+              "userName": "",
+              "userLastName": "",
+              "userAvatarFileName": "avatar7.png"
+            }
+          ],
+          "messages": [
+            {
+              "authorId": "aad006c7-f2f0-45f8-ae00-c15dbb90e0d7",
+              "message": "Love your goal buddy, keep up the good work",
+              "createdAt": "2024-10-16T09:58:29.534Z"
+            },
+            {
+              "authorId": "5422db80-d281-4be6-94dc-4870aee3bb6a",
+              "message": "Thanks!",
+              "createdAt": "2024-10-16T10:05:37.602Z"
+            }
+          ]
         }
       ]
+    },
+    {
+      "uid": "aad006c7-f2f0-45f8-ae00-c15dbb90e0d7",
+      "userNumber": 3,
+      "name": "Stefan",
+      "lastName": "Monkey",
+      "avatarFileName": "avatar2.png",
+      "goals": [],
+      "reactions": [
+        {
+          "authorId": "aad006c7-f2f0-45f8-ae00-c15dbb90e0d7",
+          "postId": "ab589c6a-ec48-43c0-a7ff-2fe57dd47770",
+          "type": "🔥"
+        }
+      ],
+      "chats": [
+        {
+          "id": "1550e1b8-70de-400a-9b7f-24a224243d06",
+          "creatorId": "aad006c7-f2f0-45f8-ae00-c15dbb90e0d7",
+          "status": "accepted",
+          "createdAt": "2024-10-16T09:58:10.701Z",
+          "users": [
+            {
+              "userId": "aad006c7-f2f0-45f8-ae00-c15dbb90e0d7",
+              "userName": "Stefan",
+              "userLastName": "Monkey",
+              "userAvatarFileName": "avatar2.png"
+            },
+            {
+              "userId": "5422db80-d281-4be6-94dc-4870aee3bb6a",
+              "userName": "",
+              "userLastName": "",
+              "userAvatarFileName": "avatar7.png"
+            }
+          ],
+          "messages": [
+            {
+              "authorId": "aad006c7-f2f0-45f8-ae00-c15dbb90e0d7",
+              "message": "Love your goal buddy, keep up the good work",
+              "createdAt": "2024-10-16T09:58:29.534Z"
+            },
+            {
+              "authorId": "5422db80-d281-4be6-94dc-4870aee3bb6a",
+              "message": "Thanks!",
+              "createdAt": "2024-10-16T10:05:37.602Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "uid": "559253f2-cbf5-4b43-b482-2b6a0d41e7d9",
+      "userNumber": 4,
+      "name": "Stefan",
+      "lastName": "Monke",
+      "avatarFileName": "",
+      "goals": [],
+      "reactions": [],
+      "chats": []
+    },
+    {
+      "uid": "827ee179-e1b5-456f-8b58-c93f2e67d40e",
+      "userNumber": 5,
+      "name": "M",
+      "lastName": "Mm",
+      "avatarFileName": "",
+      "goals": [],
+      "reactions": [],
+      "chats": []
     }
   ]
 }
