@@ -15,7 +15,13 @@
           "id": "12458e80-4de5-4dec-b1bd-4a07e644f4a2",
           "comments": [],
           "authorId": "ddbde96a-19ed-47d2-9fd6-085e35692a5e",
-          "reactions": []
+          "reactions": [
+            {
+              "authorId": "0785f51b-ca2d-43ed-9bc1-9dba5665ea1e",
+              "postId": "12458e80-4de5-4dec-b1bd-4a07e644f4a2",
+              "type": "👏"
+            }
+          ]
         },
         {
           "description": "I want to do a handstand",
@@ -96,6 +102,33 @@
               "authorId": "5422db80-d281-4be6-94dc-4870aee3bb6a",
               "message": "You?",
               "createdAt": "2024-10-15T19:15:34.185Z"
+            }
+          ]
+        },
+        {
+          "id": "938374d6-2db4-4fe1-ae5d-ea4af000146e",
+          "creatorId": "0785f51b-ca2d-43ed-9bc1-9dba5665ea1e",
+          "status": "pending",
+          "createdAt": "2024-10-16T14:18:48.382Z",
+          "users": [
+            {
+              "userId": "0785f51b-ca2d-43ed-9bc1-9dba5665ea1e",
+              "userName": "Maddie",
+              "userLastName": "Liu",
+              "userAvatarFileName": "avatar1.png"
+            },
+            {
+              "userId": "ddbde96a-19ed-47d2-9fd6-085e35692a5e",
+              "userName": "",
+              "userLastName": "",
+              "userAvatarFileName": "avatar2.png"
+            }
+          ],
+          "messages": [
+            {
+              "authorId": "0785f51b-ca2d-43ed-9bc1-9dba5665ea1e",
+              "message": "very nice",
+              "createdAt": "2024-10-16T14:18:56.569Z"
             }
           ]
         }
@@ -298,6 +331,287 @@
       "goals": [],
       "reactions": [],
       "chats": []
+    },
+    {
+      "uid": "c1efce6d-678e-4b43-ac2c-3cabed7f52b4",
+      "userNumber": 6,
+      "name": "Test",
+      "lastName": "Test",
+      "avatarFileName": "avatar2.png",
+      "goals": [
+        {
+          "description": "I want to climb Mount Everest ",
+          "createdAt": "2024-10-16T13:40:58.047Z",
+          "updatedAt": "2024-10-16T13:40:58.047Z",
+          "categories": [],
+          "id": "d851b747-ef0d-4f6c-a7f3-ea0b65de1740",
+          "comments": [
+            {
+              "id": "221f533e-bc36-4a15-a61c-d526a3e85819",
+              "goalId": "d851b747-ef0d-4f6c-a7f3-ea0b65de1740",
+              "authorId": "cf209142-123b-4dd0-bbb2-9891618ad335",
+              "description": "Sounds difficult!",
+              "createdAt": "2024-10-16T15:15:47.789Z",
+              "avatarFileName": "avatar2.png",
+              "reactions": []
+            }
+          ],
+          "authorId": "c1efce6d-678e-4b43-ac2c-3cabed7f52b4",
+          "reactions": []
+        }
+      ],
+      "reactions": [],
+      "chats": [
+        {
+          "id": "1d86a9ed-0423-4409-8489-ab3abcfedd4e",
+          "creatorId": "cf209142-123b-4dd0-bbb2-9891618ad335",
+          "status": "pending",
+          "createdAt": "2024-10-16T15:16:48.455Z",
+          "users": [
+            {
+              "userId": "cf209142-123b-4dd0-bbb2-9891618ad335",
+              "userName": "Jacob",
+              "userLastName": "Schultz",
+              "userAvatarFileName": "avatar2.png"
+            },
+            {
+              "userId": "c1efce6d-678e-4b43-ac2c-3cabed7f52b4",
+              "userName": "",
+              "userLastName": "",
+              "userAvatarFileName": "avatar2.png"
+            }
+          ],
+          "messages": [
+            {
+              "authorId": "cf209142-123b-4dd0-bbb2-9891618ad335",
+              "message": "Hej!",
+              "createdAt": "2024-10-16T15:16:59.737Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "uid": "0785f51b-ca2d-43ed-9bc1-9dba5665ea1e",
+      "userNumber": 7,
+      "name": "Maddie",
+      "lastName": "Liu",
+      "avatarFileName": "avatar1.png",
+      "goals": [
+        {
+          "description": "loss 1 kg weight",
+          "createdAt": "2024-10-16T14:15:08.819Z",
+          "updatedAt": "2024-10-16T14:15:08.819Z",
+          "categories": [{ "id": "3", "name": "Weight loss" }],
+          "id": "9f64a9a2-5827-4ba4-adb5-57c0be7c1299",
+          "comments": [
+            {
+              "id": "7f57c609-5516-4663-95ca-0d957e380fa9",
+              "goalId": "9f64a9a2-5827-4ba4-adb5-57c0be7c1299",
+              "authorId": "96bdc014-72f3-48a9-8298-1f814957b3a5",
+              "description": "wow",
+              "createdAt": "2024-10-16T14:20:01.129Z",
+              "avatarFileName": "",
+              "reactions": []
+            }
+          ],
+          "authorId": "0785f51b-ca2d-43ed-9bc1-9dba5665ea1e",
+          "reactions": [
+            {
+              "authorId": "96bdc014-72f3-48a9-8298-1f814957b3a5",
+              "postId": "9f64a9a2-5827-4ba4-adb5-57c0be7c1299",
+              "type": "🔥"
+            },
+            {
+              "authorId": "cf209142-123b-4dd0-bbb2-9891618ad335",
+              "postId": "9f64a9a2-5827-4ba4-adb5-57c0be7c1299",
+              "type": "💪"
+            }
+          ]
+        }
+      ],
+      "reactions": [
+        {
+          "authorId": "0785f51b-ca2d-43ed-9bc1-9dba5665ea1e",
+          "postId": "12458e80-4de5-4dec-b1bd-4a07e644f4a2",
+          "type": "👏"
+        }
+      ],
+      "chats": [
+        {
+          "id": "938374d6-2db4-4fe1-ae5d-ea4af000146e",
+          "creatorId": "0785f51b-ca2d-43ed-9bc1-9dba5665ea1e",
+          "status": "pending",
+          "createdAt": "2024-10-16T14:18:48.382Z",
+          "users": [
+            {
+              "userId": "0785f51b-ca2d-43ed-9bc1-9dba5665ea1e",
+              "userName": "Maddie",
+              "userLastName": "Liu",
+              "userAvatarFileName": "avatar1.png"
+            },
+            {
+              "userId": "ddbde96a-19ed-47d2-9fd6-085e35692a5e",
+              "userName": "",
+              "userLastName": "",
+              "userAvatarFileName": "avatar2.png"
+            }
+          ],
+          "messages": [
+            {
+              "authorId": "0785f51b-ca2d-43ed-9bc1-9dba5665ea1e",
+              "message": "very nice",
+              "createdAt": "2024-10-16T14:18:56.569Z"
+            }
+          ]
+        },
+        {
+          "id": "17c1805e-2957-4f7d-82ba-4cf9b1089f5e",
+          "creatorId": "96bdc014-72f3-48a9-8298-1f814957b3a5",
+          "status": "accepted",
+          "createdAt": "2024-10-16T14:20:14.430Z",
+          "users": [
+            {
+              "userId": "96bdc014-72f3-48a9-8298-1f814957b3a5",
+              "userName": "yue",
+              "userLastName": "zheng",
+              "userAvatarFileName": ""
+            },
+            {
+              "userId": "0785f51b-ca2d-43ed-9bc1-9dba5665ea1e",
+              "userName": "",
+              "userLastName": "",
+              "userAvatarFileName": "avatar1.png"
+            }
+          ],
+          "messages": [
+            {
+              "authorId": "96bdc014-72f3-48a9-8298-1f814957b3a5",
+              "message": "hello",
+              "createdAt": "2024-10-16T14:20:33.038Z"
+            },
+            {
+              "authorId": "0785f51b-ca2d-43ed-9bc1-9dba5665ea1e",
+              "message": "hi",
+              "createdAt": "2024-10-16T14:20:45.197Z"
+            },
+            {
+              "authorId": "0785f51b-ca2d-43ed-9bc1-9dba5665ea1e",
+              "message": "hi",
+              "createdAt": "2024-10-16T14:20:51.835Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "uid": "96bdc014-72f3-48a9-8298-1f814957b3a5",
+      "userNumber": 8,
+      "name": "yue",
+      "lastName": "zheng",
+      "avatarFileName": "",
+      "goals": [],
+      "reactions": [
+        {
+          "authorId": "96bdc014-72f3-48a9-8298-1f814957b3a5",
+          "postId": "9f64a9a2-5827-4ba4-adb5-57c0be7c1299",
+          "type": "🔥"
+        }
+      ],
+      "chats": [
+        {
+          "id": "17c1805e-2957-4f7d-82ba-4cf9b1089f5e",
+          "creatorId": "96bdc014-72f3-48a9-8298-1f814957b3a5",
+          "status": "accepted",
+          "createdAt": "2024-10-16T14:20:14.430Z",
+          "users": [
+            {
+              "userId": "96bdc014-72f3-48a9-8298-1f814957b3a5",
+              "userName": "yue",
+              "userLastName": "zheng",
+              "userAvatarFileName": ""
+            },
+            {
+              "userId": "0785f51b-ca2d-43ed-9bc1-9dba5665ea1e",
+              "userName": "",
+              "userLastName": "",
+              "userAvatarFileName": "avatar1.png"
+            }
+          ],
+          "messages": [
+            {
+              "authorId": "96bdc014-72f3-48a9-8298-1f814957b3a5",
+              "message": "hello",
+              "createdAt": "2024-10-16T14:20:33.038Z"
+            },
+            {
+              "authorId": "0785f51b-ca2d-43ed-9bc1-9dba5665ea1e",
+              "message": "hi",
+              "createdAt": "2024-10-16T14:20:45.197Z"
+            },
+            {
+              "authorId": "0785f51b-ca2d-43ed-9bc1-9dba5665ea1e",
+              "message": "hi",
+              "createdAt": "2024-10-16T14:20:51.835Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "uid": "cf209142-123b-4dd0-bbb2-9891618ad335",
+      "userNumber": 9,
+      "name": "Jacob",
+      "lastName": "Schultz",
+      "avatarFileName": "avatar2.png",
+      "goals": [
+        {
+          "description": "Öka omkretsen på mina armar, väldigt mycket!!",
+          "createdAt": "2024-10-16T15:12:19.311Z",
+          "updatedAt": "2024-10-16T15:19:00.486Z",
+          "categories": [{ "id": "2", "name": "Muscle gain" }],
+          "id": "1f0dbafe-d325-4699-ba6f-1d7dd9cc09ac",
+          "comments": [],
+          "authorId": "cf209142-123b-4dd0-bbb2-9891618ad335",
+          "reactions": []
+        }
+      ],
+      "reactions": [
+        {
+          "authorId": "cf209142-123b-4dd0-bbb2-9891618ad335",
+          "postId": "9f64a9a2-5827-4ba4-adb5-57c0be7c1299",
+          "type": "💪"
+        }
+      ],
+      "chats": [
+        {
+          "id": "1d86a9ed-0423-4409-8489-ab3abcfedd4e",
+          "creatorId": "cf209142-123b-4dd0-bbb2-9891618ad335",
+          "status": "pending",
+          "createdAt": "2024-10-16T15:16:48.455Z",
+          "users": [
+            {
+              "userId": "cf209142-123b-4dd0-bbb2-9891618ad335",
+              "userName": "Jacob",
+              "userLastName": "Schultz",
+              "userAvatarFileName": "avatar2.png"
+            },
+            {
+              "userId": "c1efce6d-678e-4b43-ac2c-3cabed7f52b4",
+              "userName": "",
+              "userLastName": "",
+              "userAvatarFileName": "avatar2.png"
+            }
+          ],
+          "messages": [
+            {
+              "authorId": "cf209142-123b-4dd0-bbb2-9891618ad335",
+              "message": "Hej!",
+              "createdAt": "2024-10-16T15:16:59.737Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
