@@ -25,13 +25,8 @@ userRoutes.post("/", async (req, res) => {
   console.log("Recieved user ", userFromRequest, " from app");
 
   const userJson = await readFile<Record<string, IUser>>(usersFilePath);
-  console.log("Read users from file", userJson);
 
   const usersObject = new Users(userJson);
-
-  console.log("Users object", usersObject);
-
-  // const userFromData = findUser(userJson.users, userFromRequest);
 
   const user = usersObject.findUserByNames(
     userFromRequest.firstName,
@@ -56,8 +51,6 @@ userRoutes.post("/", async (req, res) => {
 
     user.setGoalsObjects(userGoals);
 
-    console.log("User goals", user.getReactions());
-
     res.send({ user });
     return;
   }
@@ -71,7 +64,7 @@ userRoutes.post("/", async (req, res) => {
     commentsIds: [],
     goalsIds: [],
     reactions: [],
-    chats: [],
+    chatsIds: [],
   });
 
   usersObject.addUser(newUser);
@@ -114,12 +107,10 @@ userRoutes.post("/setAvatar/:userId", async (req, res) => {
   );
 
   const userJson = await readFile<Record<string, IUser>>(usersFilePath);
-  console.log("Read users from file", userJson);
   const goalsJson = await readFile<Record<string, IGoal>>(goalFilePath);
   const goalsObject = new Goals(goalsJson);
 
   const usersObject = new Users(userJson);
-  console.log("Users object", usersObject);
 
   const userFromData = usersObject.findUserByUid(userIdFromRequest);
   console.log(userFromData ? "User found" : "User not found");

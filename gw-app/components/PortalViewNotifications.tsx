@@ -16,6 +16,9 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import { router } from "expo-router";
+import AvatarImage from "./AvatarImage";
+import { getAvatar } from "@/app/constants/avatars";
 
 export default function PortalViewNotifications() {
   const dispatch = useContext(AppDispatchContext);
@@ -27,7 +30,7 @@ export default function PortalViewNotifications() {
 
   const safeArea = useSafeAreaInsets();
 
-  const position = useSharedValue(-50);
+  const position = useSharedValue(0);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -37,8 +40,10 @@ export default function PortalViewNotifications() {
       width: "90%",
       backgroundColor: "black",
       opacity: 0.5,
-      justifyContent: "center",
+      // justifyContent: "center",
+      flexDirection: "row",
       // alignItems: "center",
+      gap: 10,
       marginLeft: 10,
       marginRight: 10,
       borderRadius: 15,
@@ -87,9 +92,20 @@ export default function PortalViewNotifications() {
   const getNotiTittle = () => {
     switch (appData?.notifications[0].type) {
       case "message":
-        return "New Message";
+        return (
+          appData?.notifications[0].data.name +
+          " " +
+          appData?.notifications[0].data.lastName
+        );
       case "messageRequest":
-        return "New Message Request";
+        return (
+          "Message request: " +
+          appData?.notifications[0].data.name +
+          " " +
+          appData?.notifications[0].data.lastName
+        );
+      case "messageRequestAccepted":
+        return "Message request accepted";
       case "comment":
         return "New Comment";
       case "reaction":
@@ -109,21 +125,24 @@ export default function PortalViewNotifications() {
           >
             <TouchableWithoutFeedback
               onPress={() => {
-                if (!dispatch) return;
-                dispatch({
-                  type: AppActionType.POP_NOTIFICATION,
-                  payload: null,
-                });
+                router.navigate("/messages");
               }}
-              key={appData.notifications[0].id}
+              key={appData.notifications[0].data.id}
             >
               <Animated.View style={[animatedStyle]}>
-                <View style={{ justifyContent: "center" }}>
+                <AvatarImage
+                  size={30}
+                  avatarImage={
+                    getAvatar(appData.notifications[0].data.avatarFileName)
+                      ?.image
+                  }
+                />
+                <View style={{ justifyContent: "center", flex: 1 }}>
                   <Text style={{ fontSize: 12, color: "white" }}>
                     {getNotiTittle()}
                   </Text>
-                  <Text style={{ color: "white" }}>
-                    {appData?.notifications[0].data}
+                  <Text style={{ color: "white" }} numberOfLines={1}>
+                    {appData?.notifications[0].data.message}
                   </Text>
                 </View>
               </Animated.View>

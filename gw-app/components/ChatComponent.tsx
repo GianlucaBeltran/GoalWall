@@ -11,9 +11,11 @@ import { router } from "expo-router";
 export default function ChatComponent({
   chat,
   otherIndex,
+  messageDisplayIndex,
 }: {
   chat: Chat;
   otherIndex: number;
+  messageDisplayIndex: number;
 }) {
   const dispatch = useContext(AppDispatchContext);
   const chatStatus = chat.status;
@@ -95,9 +97,7 @@ export default function ChatComponent({
                 </Text>
               )}
               <Text style={{ color: "#6E6E6E", fontSize: 11 }}>
-                {formatedDate(
-                  chat.messages[chat.messages.length - 1].createdAt
-                )}
+                {formatedDate(chat.messages[messageDisplayIndex].createdAt)}
               </Text>
             </View>
             {canAccept && (
@@ -116,7 +116,7 @@ export default function ChatComponent({
           </View>
           <View>
             <Text style={{ fontWeight: 700 }} numberOfLines={1}>
-              {chat.messages[chat.messages.length - 1].message}
+              {chat.messages[messageDisplayIndex].message}
             </Text>
           </View>
         </View>

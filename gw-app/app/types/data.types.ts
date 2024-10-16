@@ -62,7 +62,7 @@ export interface User {
   goals: Goal[];
   comments: Comment[];
   reactions: Reaction[];
-  chats: Chat[];
+  chatsIds: Chat[];
 }
 
 export interface SelectedItem {

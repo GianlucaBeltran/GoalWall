@@ -40,6 +40,14 @@ export class Reaction {
     return this.type;
   }
 }
+export interface ChatData {
+  chat: Chat;
+  otherUserId: string;
+  otherUserName: string;
+  otherUserLastName: string;
+  otherUserAvatar: string;
+}
+
 export interface IChat {
   id: string;
   creatorId: string;
@@ -67,25 +75,13 @@ export class Chat {
   private status: "accepted" | "pending" | "rejected" | "new";
   private createdAt: string;
 
-  constructor(
-    id: string,
-    creatorId: string,
-    users: {
-      userId: string;
-      userName: string;
-      userLastName: string;
-      userAvatarFileName: string;
-    }[],
-    messages: DirectMessage[],
-    status: "accepted" | "pending" | "rejected" | "new",
-    createdAt: string
-  ) {
-    this.id = id;
-    this.creatorId = creatorId;
-    this.users = users;
-    this.messages = messages;
-    this.status = status;
-    this.createdAt = createdAt;
+  constructor(chat: IChat) {
+    this.id = chat.id;
+    this.creatorId = chat.creatorId;
+    this.users = chat.users;
+    this.messages = chat.messages;
+    this.status = chat.status;
+    this.createdAt = chat.createdAt;
   }
 
   getId(): string {
@@ -109,8 +105,16 @@ export class Chat {
     return this.messages;
   }
 
+  addMessage(message: DirectMessage) {
+    this.messages.push(message);
+  }
+
   getStatus(): "accepted" | "pending" | "rejected" | "new" {
     return this.status;
+  }
+
+  setStatus(status: "accepted" | "pending" | "rejected" | "new") {
+    this.status = status;
   }
 
   getCreatedAt(): string {
@@ -123,14 +127,14 @@ export class Chats {
 
   constructor(chats: Record<string, IChat>) {
     this.chats = Object.values(chats).reduce((acc, chat) => {
-      acc[chat.id] = new Chat(
-        chat.id,
-        chat.creatorId,
-        chat.users,
-        chat.messages,
-        chat.status,
-        chat.createdAt
-      );
+      acc[chat.id] = new Chat({
+        id: chat.id,
+        creatorId: chat.creatorId,
+        users: chat.users,
+        messages: chat.messages,
+        status: chat.status,
+        createdAt: chat.createdAt,
+      });
       return acc;
     }, {});
   }
@@ -153,6 +157,20 @@ export class Chats {
 
   getChatsArray(): Chat[] {
     return Object.values(this.chats);
+  }
+
+  getChatsByUserId(userId: string): Chat[] {
+    return Object.values(this.chats).filter((chat) =>
+      chat.getUsers().find((user) => user.userId === userId)
+    );
+  }
+
+  getChatByUsersIds(userId: string, recipientId: string): Chat | undefined {
+    return Object.values(this.chats).find(
+      (chat) =>
+        chat.getUsers().find((user) => user.userId === userId) &&
+        chat.getUsers().find((user) => user.userId === recipientId)
+    );
   }
 }
 
@@ -449,7 +467,7 @@ export interface IUser {
   goalsIds: string[];
   reactions: IReaction[];
   commentsIds: string[];
-  chats: Chat[];
+  chatsIds: string[];
 }
 
 export class User {
@@ -463,7 +481,7 @@ export class User {
   private reactions: IReaction[];
   private commentsIds: string[];
   comments: Comment[] = [];
-  private chats: Chat[];
+  private chatsIds: string[];
 
   constructor(user: IUser) {
     this.uid = user.uid;
@@ -474,7 +492,7 @@ export class User {
     this.goalsIds = user.goalsIds;
     this.reactions = user.reactions;
     this.commentsIds = user.commentsIds;
-    this.chats = user.chats;
+    this.chatsIds = user.chatsIds;
   }
 
   getUid(): string {
@@ -531,8 +549,8 @@ export class User {
     return this.commentsIds;
   }
 
-  getChats(): Chat[] {
-    return this.chats;
+  getChats(): string[] {
+    return this.chatsIds;
   }
 
   addGoal(goal: string): void {
@@ -547,8 +565,8 @@ export class User {
     this.commentsIds.push(comment);
   }
 
-  addChat(chat: Chat): void {
-    this.chats.push(chat);
+  addChat(chat: string): void {
+    this.chatsIds.push(chat);
   }
 
   removeGoal(goal: string): void {
@@ -571,8 +589,8 @@ export class User {
     this.commentsIds = this.commentsIds.filter((c) => c !== comment);
   }
 
-  removeChat(chat: Chat): void {
-    this.chats = this.chats.filter((c) => c !== chat);
+  removeChat(chatId: string): void {
+    this.chatsIds = this.chatsIds.filter((c) => c !== chatId);
   }
 
   setGoals(goals: string[]): void {
