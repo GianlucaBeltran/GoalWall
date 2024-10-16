@@ -32,6 +32,7 @@ import userRoutes from "./routes/userRoutes";
 import goalRoutes from "./routes/goalRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import reactionRoutes from "./routes/reactionRoutes";
+import messageRoutes from "./routes/messageRoutes";
 
 const app = express();
 app.use(express.json());
@@ -106,73 +107,7 @@ app.use("/user", userRoutes);
 app.use("/goal", goalRoutes);
 app.use("/comment", commentRoutes);
 app.use("/reaction", reactionRoutes);
-
-// app.get("/messages/:userId", async (req, res) => {
-//   const userId: string = req.params.userId;
-//   console.log(
-//     "Recieved request for messages from app for user with id ",
-//     userId
-//   );
-
-//   const userJson = await readFile<{ users: User[] }>(goalFilePath);
-
-//   const userFromData = findUserWithId(userJson.users, userId);
-//   console.log(userFromData ? "User found" : "User not found");
-
-//   if (!userFromData) {
-//     res.send({
-//       message: "User not found",
-//     });
-//     return;
-//   }
-//   for (const chat of userFromData.chats) {
-//     for (const user of chat.users) {
-//       if (user.userId !== userId) {
-//         const otherUser = findUserWithId(userJson.users, user.userId);
-//         console.log(otherUser.name, otherUser.lastName, "otherUser");
-//         user.userName = otherUser.name;
-//         user.userLastName = otherUser.lastName;
-//         user.userAvatarFileName = otherUser.avatarFileName;
-//       } else {
-//         user.userName = userFromData.name;
-//         user.userLastName = userFromData.lastName;
-//         user.userAvatarFileName = userFromData.avatarFileName;
-//       }
-//     }
-//   }
-
-//   res.send({
-//     messages: userFromData.chats,
-//   });
-//   console.log("Messages sent");
-// });
-
-// app.delete("/reaction", async (req, res) => {
-//   const reaction: Reaction = req.body.reaction;
-//   const userId: string = req.body.userId;
-//   const origin: "sharedGoals" | "othersGoals" = req.body.origin;
-//   console.log(
-//     "Recieved reaction",
-//     reaction,
-//     " to delete, from app from user id " +
-//       reaction.authorId +
-//       " for post with id " +
-//       reaction.postId
-//   );
-
-//   let userJson = await readFile<{ users: User[] }>(goalFilePath);
-
-//   const updatedUsers = await removeReaction(userJson.users, reaction);
-
-//   console.log("Reaction removed", userId);
-
-//   res.send({
-//     goals:
-//       origin === "sharedGoals"
-//         ? findUserWithId(updatedUsers, userId).goals
-//         : getAllGoals(userId, updatedUsers),
-//   });
-// });
+app.use("/message", messageRoutes);
 
 httpServer.listen(port, () => {
   return console.log(`Express is listening at http://localhost:${port}`);

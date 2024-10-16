@@ -46,8 +46,7 @@ reactionRoutes.post("/", async (req, res) => {
   const commentsObject = new Comments(commentsJson);
 
   const user = usersObject.findUserByUid(userId);
-  const reactionObject = new Reaction(reaction);
-  reactionObject.setReactionId(uuidv4());
+  reaction.reactionId = uuidv4();
 
   console.log(user ? "User found" : "User not found");
 
@@ -58,13 +57,13 @@ reactionRoutes.post("/", async (req, res) => {
     return;
   }
 
-  user.addReaction(reactionObject);
+  user.addReaction(reaction);
 
   const goal = goalsObject.findGoalById(reaction.postId);
 
   if (origin === "sharedGoals") {
     const comment = commentsObject.findCommentById(reaction.postId);
-    comment.addReaction(reactionObject);
+    comment.addReaction(reaction);
     await writeData(commentFilePath, commentsObject.getComments());
     await writeData(usersFilePath, usersObject.users);
 
@@ -81,7 +80,7 @@ reactionRoutes.post("/", async (req, res) => {
     });
   } else {
     if (goal) {
-      goal.addReaction(reactionObject);
+      goal.addReaction(reaction);
       await writeData(goalFilePath, goalsObject.getGoals());
       await writeData(usersFilePath, usersObject.users);
 
@@ -101,7 +100,7 @@ reactionRoutes.post("/", async (req, res) => {
       return;
     } else {
       const comment = commentsObject.findCommentById(reaction.postId);
-      comment.addReaction(reactionObject);
+      comment.addReaction(reaction);
       await writeData(commentFilePath, commentsObject.getComments());
       await writeData(usersFilePath, usersObject.users);
 
@@ -146,7 +145,6 @@ reactionRoutes.delete("/", async (req, res) => {
   const commentsObject = new Comments(commentsJson);
 
   const user = usersObject.findUserByUid(userId);
-  const reactionObject = new Reaction(reaction);
   console.log(user ? "User found" : "User not found");
 
   if (!user) {
@@ -155,15 +153,15 @@ reactionRoutes.delete("/", async (req, res) => {
     });
     return;
   }
-  console.log("Reaction to remove", reactionObject);
+  console.log("Reaction to remove", reaction);
   console.log("User reactions", user.getReactions());
-  user.removeReaction(reactionObject);
+  user.removeReaction(reaction);
 
   const goal = goalsObject.findGoalById(reaction.postId);
 
   if (origin === "sharedGoals") {
     const comment = commentsObject.findCommentById(reaction.postId);
-    comment.removeReaction(reactionObject);
+    comment.removeReaction(reaction);
     console.log("Comment reactions", comment.getReactions());
     await writeData(commentFilePath, commentsObject.getComments());
     await writeData(usersFilePath, usersObject.users);
@@ -181,7 +179,7 @@ reactionRoutes.delete("/", async (req, res) => {
     });
   } else {
     if (goal) {
-      goal.removeReaction(reactionObject);
+      goal.removeReaction(reaction);
       await writeData(goalFilePath, goalsObject.getGoals());
       await writeData(usersFilePath, usersObject.users);
 
@@ -201,7 +199,7 @@ reactionRoutes.delete("/", async (req, res) => {
       return;
     } else {
       const comment = commentsObject.findCommentById(reaction.postId);
-      comment.removeReaction(reactionObject);
+      comment.removeReaction(reaction);
       await writeData(commentFilePath, commentsObject.getComments());
       await writeData(usersFilePath, usersObject.users);
 

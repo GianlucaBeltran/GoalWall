@@ -6,3 +6,6 @@ export const goalFilePath =
 
 export const commentFilePath =
   "/Users/gianlucabeltran/KTH/1Sem/GoalWall/gw-api/src/data/comments.json";
+
+export const chatFilePath =
+  "/Users/gianlucabeltran/KTH/1Sem/GoalWall/gw-api/src/data/chats.json";

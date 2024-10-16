@@ -178,8 +178,8 @@ export default function PortalViewPost({
   const handleReaction = async (reactionType: "❤️" | "👏" | "💪" | "🔥") => {
     if (!dispatch || !appData) return;
 
-    const reaction = appData.user?.reactions.find(
-      (r) => r.postId === selectedItem?.item.id && r.type === reactionType
+    let reaction: Reaction | undefined = selectedItem?.item.reactions?.find(
+      (r) => r.authorId === appData.user?.uid && r.type === reactionType
     );
 
     console.log("Reaction", appData.user?.reactions, reaction);

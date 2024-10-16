@@ -78,6 +78,8 @@ userRoutes.post("/", async (req, res) => {
 
   await writeData(usersFilePath, usersObject.users);
 
+  newUser.setGoalsObjects([]);
+
   res.send({ user: newUser });
 });
 

@@ -33,7 +33,6 @@ goalRoutes.post("/", async (req, res) => {
 
   const usersObject = new Users(userJson);
   const goalsObject = new Goals(goalJson);
-  const goalObject = new Goal(goal);
 
   const userFromData = usersObject.findUserByUid(userId);
   console.log(userFromData ? "User found" : "User not found");
@@ -49,17 +48,58 @@ goalRoutes.post("/", async (req, res) => {
     userFromData.setAvatarFileName(avatarFileName);
   }
 
-  const goalExists = goalsObject.findGoalById(goalObject.getGoalId());
+  const goalExists = goalsObject.findGoalById(goal.id);
 
   console.log(
     goalExists ? "Goal already exists replacing with incoming goal" : "New goal"
   );
 
   if (goalExists) {
-    goalsObject.replaceGoal(goalObject);
+    const commentsJson = await readFile<Record<string, IComment>>(
+      commentFilePath
+    );
+    const commentsObject = new Comments(commentsJson);
+    const goalComments = commentsObject.findCommentsByGoalId(goal.id);
+
+    goalsObject.replaceGoal(
+      new Goal({
+        id: goal.id,
+        authorId: goal.authorId,
+        description: goal.description,
+        createdAt: goal.createdAt,
+        updatedAt: goal.updatedAt,
+        categories: goal.categories,
+        commentsIds: goalComments.map((comment) => comment.getId()),
+        avatarFileName: goal.avatarFileName,
+        reactions: goal.reactions,
+      })
+    );
+    await writeData(goalFilePath, goalsObject.getGoals());
+
+    for (const goal of goalsObject.getGoalsArray()) {
+      goal.setCommentsObjects(
+        commentsObject.findCommentsByGoalId(goal.getGoalId())
+      );
+    }
+    userFromData.setGoalsObjects(
+      goalsObject.findGoalsByAuthorId(userFromData.getUid())
+    );
+
+    res.send({ user: userFromData });
+    return;
   } else {
+    const goalObject = new Goal({
+      id: uuidv4(),
+      authorId: goal.authorId,
+      description: goal.description,
+      createdAt: goal.createdAt,
+      updatedAt: goal.updatedAt,
+      categories: goal.categories,
+      commentsIds: [],
+      avatarFileName: goal.avatarFileName,
+      reactions: goal.reactions,
+    });
     console.log("Adding new goal", goalObject);
-    goalObject.setId(uuidv4());
     goalsObject.addGoal(goalObject);
     userFromData.addGoal(goalObject.getGoalId());
     await writeData(usersFilePath, usersObject.users);
@@ -111,7 +151,30 @@ goalRoutes.delete("/", async (req, res) => {
   }
 
   goalsObject.removeGoal(existingGoal);
-  userFromData.removeGoal(existingGoal.getGoalId());
+  for (const user of usersObject.getUsersArray()) {
+    user.removeActionsRelatedToPost(existingGoal.getGoalId());
+  }
+
+  if (existingGoal.getCommentsIds().length > 0) {
+    console.log(
+      "Removing comments for goal ",
+      existingGoal.getGoalId(),
+      existingGoal.getComments()
+    );
+    const commentsJson = await readFile<Record<string, IComment>>(
+      commentFilePath
+    );
+    const commentsObject = new Comments(commentsJson);
+
+    for (const comment of existingGoal.getCommentsIds()) {
+      commentsObject.removeComment(comment);
+      for (const user of usersObject.getUsersArray()) {
+        user.removeActionsRelatedToPost(comment);
+      }
+    }
+
+    await writeData(commentFilePath, commentsObject.getComments());
+  }
 
   await writeData(goalFilePath, goalsObject.getGoals());
   await writeData(usersFilePath, usersObject.users);
@@ -178,25 +241,5 @@ goalRoutes.get("/allGoals", async (req, res) => {
   });
   console.log("All goals sent");
 });
-
-// goalRoutes.post("/myGoals", async (req, res) => {
-//   const userId: string = req.body.userId;
-//   console.log("Recieved request for goals from app for user with id ", userId);
-
-//   const userJson = await readFile<Record<string, IUser>>(usersFilePath);
-//   const goalsJson = await readFile<Record<string, IGoal>>(goalFilePath);
-
-//   const usersObject = new Users(userJson);
-
-//   const userFromData = usersObject.findUserByUid(userId);
-
-//   const goals = userFromData ? userFromData.getGoals() : [];
-//   console.log("Goals found ", goals);
-
-//   res.send({
-//     goals,
-//   });
-//   console.log("Goals sent");
-// });
 
 export default goalRoutes;

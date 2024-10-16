@@ -69,7 +69,7 @@ export default function messages() {
     (async () => {
       try {
         const response = await fetch(
-          appData.api + "/messages/" + appData.user?.uid,
+          appData.api + "/message/" + appData.user?.uid,
           {
             method: "get",
             headers: {

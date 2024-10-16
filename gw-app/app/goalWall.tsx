@@ -279,7 +279,6 @@ export default function GoalWall() {
       try {
         const response = await fetch(appData?.api + "/goal/allGoals");
         const data = await response.json();
-        console.log("data@@@", data);
         setGoals(data.goals);
       } catch (error) {
         console.error(error);

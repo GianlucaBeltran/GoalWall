@@ -118,6 +118,44 @@ export class Chat {
   }
 }
 
+export class Chats {
+  private chats: Record<string, Chat> = {};
+
+  constructor(chats: Record<string, IChat>) {
+    this.chats = Object.values(chats).reduce((acc, chat) => {
+      acc[chat.id] = new Chat(
+        chat.id,
+        chat.creatorId,
+        chat.users,
+        chat.messages,
+        chat.status,
+        chat.createdAt
+      );
+      return acc;
+    }, {});
+  }
+
+  findChatById(chatId: string): Chat | undefined {
+    return this.chats[chatId];
+  }
+
+  addChat(chat: Chat): void {
+    this.chats[chat.getId()] = chat;
+  }
+
+  removeChat(chat: Chat): void {
+    delete this.chats[chat.getId()];
+  }
+
+  getChats(): Record<string, Chat> {
+    return this.chats;
+  }
+
+  getChatsArray(): Chat[] {
+    return Object.values(this.chats);
+  }
+}
+
 export interface IComment {
   id: string;
   authorId: string;
@@ -125,7 +163,7 @@ export interface IComment {
   description: string;
   createdAt: string;
   goalId: string;
-  reactions: Reaction[];
+  reactions: IReaction[];
 }
 
 export class Comment {
@@ -135,7 +173,7 @@ export class Comment {
   private description: string;
   private createdAt: string;
   private goalId: string;
-  private reactions: Reaction[];
+  private reactions: IReaction[];
 
   constructor(comment: IComment) {
     this.id = comment.id;
@@ -179,17 +217,17 @@ export class Comment {
     return this.goalId;
   }
 
-  getReactions(): Reaction[] {
+  getReactions(): IReaction[] {
     return this.reactions;
   }
 
-  addReaction(reaction: Reaction): void {
+  addReaction(reaction: IReaction): void {
     this.reactions.push(reaction);
   }
 
-  removeReaction(reaction: Reaction): void {
+  removeReaction(reaction: IReaction): void {
     this.reactions = this.reactions.filter(
-      (r) => r.getReactionId() !== reaction.getReactionId()
+      (r) => r.reactionId !== reaction.reactionId
     );
   }
 }
@@ -218,8 +256,8 @@ export class Comments {
     this.comments[comment.getId()] = comment;
   }
 
-  removeComment(comment: Comment): void {
-    delete this.comments[comment.getId()];
+  removeComment(comment: string): void {
+    delete this.comments[comment];
   }
 
   replaceComment(comment: Comment): void {
@@ -245,7 +283,7 @@ export interface IGoal {
   categories: { id: string; name: string }[];
   commentsIds: string[];
   avatarFileName: string;
-  reactions: Reaction[];
+  reactions: IReaction[];
 }
 
 export class Goal {
@@ -258,7 +296,7 @@ export class Goal {
   comments: Comment[] = [];
   private commentsIds: string[];
   private avatarFileName: string;
-  private reactions: Reaction[];
+  private reactions: IReaction[];
 
   constructor(goal: IGoal) {
     this.id = goal.id;
@@ -308,7 +346,7 @@ export class Goal {
     this.avatarFileName = avatarFileName;
   }
 
-  getReactions(): Reaction[] {
+  getReactions(): IReaction[] {
     return this.reactions;
   }
 
@@ -316,7 +354,11 @@ export class Goal {
     return this.comments;
   }
 
-  addReaction(reaction: Reaction): void {
+  getCommentsIds(): string[] {
+    return this.commentsIds;
+  }
+
+  addReaction(reaction: IReaction): void {
     this.reactions.push(reaction);
   }
 
@@ -328,10 +370,15 @@ export class Goal {
     this.comments = comments;
   }
 
-  removeReaction(reaction: Reaction): void {
+  removeReaction(reaction: IReaction): void {
     this.reactions = this.reactions.filter(
-      (r) => r.getReactionId() !== reaction.getReactionId()
+      (r) => r.reactionId !== reaction.reactionId
     );
+  }
+
+  removeActionsRelatedToPost(postId: string): void {
+    this.reactions = this.reactions.filter((r) => r.postId !== postId);
+    this.commentsIds = this.commentsIds.filter((c) => c !== postId);
   }
 
   removeComment(comment: Comment): void {
@@ -400,7 +447,7 @@ export interface IUser {
   lastName: string;
   avatarFileName: string;
   goalsIds: string[];
-  reactions: Reaction[];
+  reactions: IReaction[];
   commentsIds: string[];
   chats: Chat[];
 }
@@ -413,7 +460,7 @@ export class User {
   private avatarFileName: string;
   private goalsIds: string[];
   goals: Goal[];
-  private reactions: Reaction[];
+  private reactions: IReaction[];
   private commentsIds: string[];
   comments: Comment[] = [];
   private chats: Chat[];
@@ -472,12 +519,16 @@ export class User {
     this.goals[goalId] = goal;
   }
 
-  getReactions(): Reaction[] {
+  getReactions(): IReaction[] {
     return this.reactions;
   }
 
   getComments(): Comment[] {
     return this.comments;
+  }
+
+  getCommentsIds(): string[] {
+    return this.commentsIds;
   }
 
   getChats(): Chat[] {
@@ -488,7 +539,7 @@ export class User {
     this.goalsIds.push(goal);
   }
 
-  addReaction(reaction: Reaction): void {
+  addReaction(reaction: IReaction): void {
     this.reactions.push(reaction);
   }
 
@@ -504,14 +555,20 @@ export class User {
     this.goalsIds = this.goalsIds.filter((g) => g !== goal);
   }
 
-  removeReaction(reaction: Reaction): void {
+  removeReaction(reaction: IReaction): void {
     this.reactions = this.reactions.filter(
-      (r) => r.getReactionId() !== reaction.getReactionId()
+      (r) => r.reactionId !== reaction.reactionId
     );
   }
 
-  removeComment(comment: Comment): void {
-    this.comments = this.comments.filter((c) => c !== comment);
+  removeActionsRelatedToPost(postId: string): void {
+    this.goalsIds = this.goalsIds.filter((g) => g !== postId);
+    this.commentsIds = this.commentsIds.filter((c) => c !== c);
+    this.reactions = this.reactions.filter((r) => r.postId !== postId);
+  }
+
+  removeComment(comment: string): void {
+    this.commentsIds = this.commentsIds.filter((c) => c !== comment);
   }
 
   removeChat(chat: Chat): void {
@@ -536,6 +593,10 @@ export class Users {
     return Object.values(this.users).find((user) => {
       return user.getName() === firstName && user.getLastName() === lastName;
     });
+  }
+
+  getUsersArray(): User[] {
+    return Object.values(this.users);
   }
 
   findUserByUid(uid: string): User | undefined {
