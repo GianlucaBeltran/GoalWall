@@ -270,13 +270,16 @@ export default function GoalWall() {
 
   useEffect(() => {
     (async () => {
-      changeScreenOrientation(
+      await changeScreenOrientation(
         ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT
       );
 
+      console.log("fetching goals");
+
       try {
-        const response = await fetch(appData?.api + "/allGoals");
+        const response = await fetch(appData?.api + "/goal/allGoals");
         const data = await response.json();
+        console.log("data@@@", data);
         setGoals(data.goals);
       } catch (error) {
         console.error(error);
@@ -297,10 +300,6 @@ export default function GoalWall() {
   const paths = Array.from({ length: 4 }, (_, i) => {
     return goals.slice(i * goalsPerPath, (i + 1) * goalsPerPath);
   });
-
-  // if (goals.length % 4 !== 0) {
-  //   paths[3] = paths[3].concat(goals.slice(paths[3].length * 4));
-  // }
 
   return (
     <ImageBackground

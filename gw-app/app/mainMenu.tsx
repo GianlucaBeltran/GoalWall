@@ -28,7 +28,7 @@ export default function mainMenu() {
   }
 
   useEffect(() => {
-    changeScreenOrientation();
+    // changeScreenOrientation();
   }, []);
 
   return (

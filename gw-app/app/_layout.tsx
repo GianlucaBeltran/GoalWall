@@ -60,7 +60,7 @@ export default function RootLayout() {
   }, [loaded]);
 
   useEffect(() => {
-    if (!appData?.user || !dispatch) return;
+    if (!appData?.user || !dispatch || appData.socket?.connected) return;
 
     console.log("setting socket");
 

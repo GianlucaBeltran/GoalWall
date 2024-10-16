@@ -51,7 +51,7 @@ export default function Post({
     try {
       const response = await fetch(
         appData?.api +
-          "/comments/" +
+          "/comment/" +
           postData.data.authorId +
           "/" +
           postData.data.id,
@@ -60,6 +60,7 @@ export default function Post({
         }
       );
       const data = await response.json();
+      console.log(data, "data");
       setComments(data.comments);
       setShowComments(true);
     } catch (error) {
@@ -98,7 +99,7 @@ export default function Post({
       try {
         const response = await fetch(
           appData.api +
-            "/comments/" +
+            "/comment/" +
             postData.data.authorId +
             "/" +
             postData.data.id,
@@ -107,6 +108,7 @@ export default function Post({
           }
         );
         const data = await response.json();
+        console.log(data, "data");
         setComments(data.comments);
       } catch (error) {
         console.log(error, "error");

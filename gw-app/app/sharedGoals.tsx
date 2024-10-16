@@ -73,7 +73,7 @@ export default function sharedGoals() {
             </View>
           </View>
         )}
-        {appData?.user?.goals?.length !== 0 && (
+        {appData?.myGoals.length !== 0 && (
           <View style={{ flex: 1, justifyContent: "space-evenly", gap: 20 }}>
             <View
               style={{

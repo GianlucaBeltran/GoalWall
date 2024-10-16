@@ -21,6 +21,7 @@ export interface Chat {
 }
 
 export interface Reaction {
+  reactionId: string;
   authorId: string;
   postId: string;
   type: "❤️" | "👏" | "💪" | "🔥";
