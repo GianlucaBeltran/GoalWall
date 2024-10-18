@@ -44,7 +44,7 @@ export default function RootLayout() {
   const [appData, dispatch] = useReducer(appDataReducer, {
     user: null,
     editingData: null,
-    api: urlNgrok,
+    api: urlHome,
     isLoading: false,
     sharedGoals: [],
     myGoals: [],
