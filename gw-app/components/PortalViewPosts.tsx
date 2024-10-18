@@ -97,6 +97,7 @@ export default function PortalViewPost({
   const appData = useContext(AppContext);
 
   const [reaction, setReaction] = useState({ id: "", icon: "" });
+  const [hasChatWithUser, setHasChatWithUser] = useState(false);
   const [postDimensions, setPostDimensions] = useState({ width: 0, height: 0 });
   const [actionMenuDimensions, setActionMenuDimensions] = useState({
     width: 0,
@@ -178,10 +179,17 @@ export default function PortalViewPost({
   const handleReaction = async (reactionType: "❤️" | "👏" | "💪" | "🔥") => {
     if (!dispatch || !appData) return;
 
+    let reaction: Reaction | undefined = selectedItem?.item.reactions?.find(
+      (r) => r.authorId === appData.user?.uid && r.type === reactionType
+    );
+
+    console.log("Reaction", appData.user?.reactions, reaction);
+
     const newReaction: Reaction = {
-      authorId: appData.user?.uid!,
-      postId: selectedItem?.item.id!,
-      type: reactionType!,
+      reactionId: reaction ? reaction.reactionId : "",
+      authorId: reaction ? reaction.authorId : appData.user?.uid!,
+      postId: reaction ? reaction.postId : selectedItem?.item.id!,
+      type: reaction ? reaction.type : reactionType,
     };
 
     const body = {
@@ -234,43 +242,49 @@ export default function PortalViewPost({
     );
   };
 
-  const checkIfHasChat = () => {
-    if (!appData) return -1;
+  const handleDirectMessage = async () => {
+    if (!dispatch || !appData) return;
 
-    return appData.user?.chats.findIndex((chat) =>
-      chat.users[0].userId === appData.user?.uid &&
-      chat.users[1].userId === selectedItem?.item.authorId
-        ? chat
-        : chat.users[0].userId === selectedItem?.item.authorId &&
-          chat.users[1].userId === appData.user?.uid
-        ? chat
-        : null
-    );
+    console.log("handle directMessage");
+
+    // dispatch({
+    //   type: AppActionType.SET_CURRENT_CHAT,
+    //   payload: data.chat,
+    // });
+
+    setSelectedItem(null);
+    router.navigate("/chat");
   };
 
-  const getOtherUserInfo = () => {
-    if (!appData) return;
+  useEffect(() => {
+    if (!appData || !dispatch) return;
+    (async () => {
+      try {
+        const response = await fetch(
+          appData.api +
+            "/chat/" +
+            appData?.user?.uid +
+            "/" +
+            selectedItem?.item.authorId
+        );
+        const data: { chat: ChatData; newChat: boolean } =
+          await response.json();
 
-    const chat = checkIfHasChat();
+        if (data.newChat) {
+          setHasChatWithUser(false);
+        } else {
+          setHasChatWithUser(true);
+        }
 
-    if (chat !== -1 && chat !== undefined) {
-      return {
-        otherUserId: appData?.user?.chats[chat].users.filter(
-          (user) => user.userId !== appData.user?.uid
-        )[0].userId,
-        otherUserName: appData?.user?.chats[chat].users.filter(
-          (user) => user.userId !== appData.user?.uid
-        )[0].userName,
-        otherUserLastName: appData?.user?.chats[chat].users.filter(
-          (user) => user.userId !== appData.user?.uid
-        )[0].userLastName,
-        otherUserAvatar:
-          appData?.user?.chats[chat].users.filter(
-            (user) => user.userId !== appData.user?.uid
-          )[0].userAvatarFileName || "",
-      };
-    }
-  };
+        dispatch({
+          type: AppActionType.SET_CURRENT_CHAT,
+          payload: data.chat,
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    })();
+  }, [selectedItem]);
 
   return (
     <>
@@ -406,67 +420,7 @@ export default function PortalViewPost({
                           key={action.title}
                           onPress={() => {
                             if (action.title === "Send message request") {
-                              if (!dispatch) return;
-
-                              const chat = checkIfHasChat();
-
-                              if (chat === -1) {
-                                const newChat: Chat = {
-                                  id: "",
-                                  creatorId: appData?.user?.uid!,
-                                  status: "new",
-                                  createdAt: new Date().toISOString(),
-                                  users: [
-                                    {
-                                      userId: appData?.user?.uid!,
-                                      userName: appData?.user?.name!,
-                                      userLastName: appData?.user?.lastName!,
-                                      userAvatarFileName:
-                                        appData?.user?.avatarFileName!,
-                                    },
-                                    {
-                                      userId: selectedItem.item.authorId,
-                                      userName: "",
-                                      userLastName: "",
-                                      userAvatarFileName:
-                                        selectedItem.avatarFileName || "",
-                                    },
-                                  ],
-                                  messages: [],
-                                };
-
-                                dispatch({
-                                  type: AppActionType.SET_CURRENT_CHAT,
-                                  payload: {
-                                    chat: newChat,
-                                    otherUserId: selectedItem.item.authorId,
-                                    otherUserName: "",
-                                    otherUserLastName: "",
-                                    otherUserAvatar:
-                                      selectedItem.avatarFileName || "",
-                                  },
-                                });
-
-                                router.navigate("/chat");
-                              } else if (chat !== -1 && chat !== undefined) {
-                                const otherUser = getOtherUserInfo();
-                                const chatData: ChatData = {
-                                  chat: appData?.user?.chats[chat]!,
-                                  otherUserId: otherUser?.otherUserId || "",
-                                  otherUserName: otherUser?.otherUserName || "",
-                                  otherUserLastName:
-                                    otherUser?.otherUserLastName || "",
-                                  otherUserAvatar:
-                                    otherUser?.otherUserAvatar || "",
-                                };
-
-                                dispatch({
-                                  type: AppActionType.SET_CURRENT_CHAT,
-                                  payload: chatData,
-                                });
-
-                                router.navigate("/chat");
-                              }
+                              router.navigate("/chat");
                             }
                           }}
                           style={{
@@ -477,7 +431,8 @@ export default function PortalViewPost({
                           }}
                         >
                           <Text style={{ fontSize: 18, color: action.tint }}>
-                            {checkIfHasChat() !== -1
+                            {hasChatWithUser &&
+                            action.title === "Send message request"
                               ? "Open chat"
                               : action.title}
                           </Text>

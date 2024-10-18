@@ -32,7 +32,7 @@ export default function PortalViewAvatars({
         avatarFileName: avatar.fileName,
       };
       const response = await fetch(
-        appData?.api + "/setAvatar/" + appData?.user?.uid,
+        appData?.api + "/user/setAvatar/" + appData?.user?.uid,
         {
           method: "POST",
           headers: {

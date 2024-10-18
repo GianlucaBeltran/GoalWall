@@ -64,6 +64,7 @@ export default function PortalViewReply({
         },
       });
       const data = await response.json();
+      console.log("handleSubmit data", data);
 
       if (data.error) {
         console.log("handleSubmit error", data.error);

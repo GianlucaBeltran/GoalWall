@@ -45,7 +45,6 @@ export default function Home() {
                 id: "1",
                 header: "Membership",
                 clickable: true,
-                navigation: "/directMessage",
                 svg: <MembermshipSVG />,
               },
               {

@@ -33,27 +33,28 @@ const categories: Category[] = [
   },
   {
     id: "1",
-    name: "Mental Health",
+    name: "Wellness",
   },
   {
     id: "2",
-    name: "Muscle gain",
+    name: "Strength",
   },
   {
     id: "3",
-    name: "Weight loss",
+    name: "Flexibility",
   },
   {
     id: "4",
-    name: "Weight gain",
+    name: "Mental health",
   },
+
   {
     id: "5",
-    name: "Mental health",
+    name: "Motivation",
   },
   {
     id: "6",
-    name: "Handstand",
+    name: "Recovery",
   },
 ];
 
@@ -176,7 +177,7 @@ export default function setGoals() {
           Choose a category
         </Text>
         <View style={styles.categoryContainer}>
-          {categories.map((category) => (
+          {categories.map((category, index) => (
             <TouchableOpacity
               key={category.id}
               onPress={() => {
@@ -194,6 +195,7 @@ export default function setGoals() {
                   }
                 });
               }}
+              disabled={!index}
             >
               <CategoryTag
                 category={category.name}

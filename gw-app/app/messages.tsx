@@ -21,7 +21,6 @@ import {
 import { Chat, SelectedItem } from "./types/data.types";
 import { Host } from "react-native-portalize";
 import PortalViewPosts from "@/components/PortalViewPosts";
-import Post from "@/components/Post";
 import SearchSVG from "@/components/svg/SearchSVG";
 import SortSVG from "@/components/svg/SortSVG";
 import CloseSVG from "@/components/svg/CloseSVG";
@@ -30,16 +29,13 @@ import ChatComponent from "@/components/ChatComponent";
 import InboxSVG from "@/components/svg/InboxSVG";
 
 export default function messages() {
+  const appData = useContext(AppContext);
+  const dispatch = useContext(AppDispatchContext);
   const [itemCoordinates, setItemCoordinates] = useState({ x: 0, y: 0 });
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
-  // const [othersGoals, setOtherGoals] = useState<Goal[] | null>(null);
-  const [messages, setMessages] = useState<Chat[] | null>(null);
   const [filteredMessages, setfilteredMessages] = useState<Chat[] | null>(null);
   const [search, setSearch] = useState("");
   const [replying, setReplying] = useState<SelectedItem | null>(null);
-
-  const appData = useContext(AppContext);
-  const dispatch = useContext(AppDispatchContext);
 
   const onReply = (e: GestureResponderEvent, item: SelectedItem) => {
     const { pageY, locationY } = e.nativeEvent;
@@ -66,10 +62,15 @@ export default function messages() {
   useEffect(() => {
     if (!appData || !dispatch) return;
 
+    dispatch({
+      type: AppActionType.SET_NEW_MESSAGE,
+      payload: false,
+    });
+
     (async () => {
       try {
         const response = await fetch(
-          appData.api + "/messages/" + appData.user?.uid,
+          appData.api + "/chat/" + appData.user?.uid,
           {
             method: "get",
             headers: {
@@ -98,16 +99,25 @@ export default function messages() {
 
   useEffect(() => {
     if (!search) return;
-    if (!messages) return;
 
-    const filteredMessages = messages.filter((message) => {
-      return message.messages.some((msg) =>
+    const filteredMessages = appData?.chats.filter((chat) => {
+      return chat.messages.some((msg) =>
         msg.message.toLowerCase().includes(search.toLowerCase())
       );
     });
 
     setfilteredMessages(filteredMessages || []);
   }, [search]);
+
+  const getChatMessageDisplayIndex = (chat: Chat) => {
+    if (!search) return chat.messages.length - 1;
+
+    const message = chat.messages.findLastIndex((msg) =>
+      msg.message.toLowerCase().includes(search.toLowerCase())
+    );
+
+    return Math.max(message, 0);
+  };
 
   return (
     <Host>
@@ -232,6 +242,7 @@ export default function messages() {
                   <ChatComponent
                     chat={item}
                     otherIndex={appData?.user?.uid === item.creatorId ? 1 : 0}
+                    messageDisplayIndex={getChatMessageDisplayIndex(item)}
                   />
                 )}
                 bounces={false}

@@ -51,7 +51,7 @@ export default function Post({
     try {
       const response = await fetch(
         appData?.api +
-          "/comments/" +
+          "/comment/" +
           postData.data.authorId +
           "/" +
           postData.data.id,
@@ -60,6 +60,7 @@ export default function Post({
         }
       );
       const data = await response.json();
+      console.log(data, "data");
       setComments(data.comments);
       setShowComments(true);
     } catch (error) {
@@ -98,7 +99,7 @@ export default function Post({
       try {
         const response = await fetch(
           appData.api +
-            "/comments/" +
+            "/comment/" +
             postData.data.authorId +
             "/" +
             postData.data.id,
@@ -107,6 +108,7 @@ export default function Post({
           }
         );
         const data = await response.json();
+        console.log(data, "data");
         setComments(data.comments);
       } catch (error) {
         console.log(error, "error");
@@ -116,41 +118,26 @@ export default function Post({
 
   const postReactions = new Set(postData.data.reactions?.map((r) => r.type));
 
-  const checkIfHasChat = () => {
-    if (!appData) return -1;
+  const handleProfileTap = async () => {
+    if (!dispatch) return;
+    try {
+      const response = await fetch(
+        appData.api +
+          "/chat/" +
+          appData?.user?.uid +
+          "/" +
+          postData.data.authorId
+      );
+      const data: { chat: ChatData; newChat: boolean } = await response.json();
 
-    return appData.user?.chats.findIndex((chat) =>
-      chat.users[0].userId === appData.user?.uid &&
-      chat.users[1].userId === postData.data.authorId
-        ? chat
-        : chat.users[0].userId === postData.data.authorId &&
-          chat.users[1].userId === appData.user?.uid
-        ? chat
-        : null
-    );
-  };
+      dispatch({
+        type: AppActionType.SET_CURRENT_CHAT,
+        payload: data.chat,
+      });
 
-  const getOtherUserInfo = () => {
-    if (!appData) return;
-
-    const chat = checkIfHasChat();
-
-    if (chat !== -1 && chat !== undefined) {
-      return {
-        otherUserId: appData?.user?.chats[chat].users.filter(
-          (user) => user.userId !== appData.user?.uid
-        )[0].userId,
-        otherUserName: appData?.user?.chats[chat].users.filter(
-          (user) => user.userId !== appData.user?.uid
-        )[0].userName,
-        otherUserLastName: appData?.user?.chats[chat].users.filter(
-          (user) => user.userId !== appData.user?.uid
-        )[0].userLastName,
-        otherUserAvatar:
-          appData?.user?.chats[chat].users.filter(
-            (user) => user.userId !== appData.user?.uid
-          )[0].userAvatarFileName || "",
-      };
+      router.navigate("/chat");
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -176,62 +163,7 @@ export default function Post({
       >
         <TouchableOpacity
           onPress={() => {
-            if (!dispatch) return;
-
-            const chat = checkIfHasChat();
-
-            if (chat === -1) {
-              const newChat: Chat = {
-                id: "",
-                creatorId: appData?.user?.uid!,
-                status: "new",
-                createdAt: new Date().toISOString(),
-                users: [
-                  {
-                    userId: appData?.user?.uid!,
-                    userName: appData?.user?.name!,
-                    userLastName: appData?.user?.lastName!,
-                    userAvatarFileName: appData?.user?.avatarFileName!,
-                  },
-                  {
-                    userId: postData.data.authorId,
-                    userName: "",
-                    userLastName: "",
-                    userAvatarFileName: postData.data.avatarFileName || "",
-                  },
-                ],
-                messages: [],
-              };
-
-              dispatch({
-                type: AppActionType.SET_CURRENT_CHAT,
-                payload: {
-                  chat: newChat,
-                  otherUserId: postData.data.authorId,
-                  otherUserName: "",
-                  otherUserLastName: "",
-                  otherUserAvatar: postData.data.avatarFileName || "",
-                },
-              });
-
-              router.navigate("/chat");
-            } else if (chat !== -1 && chat !== undefined) {
-              const otherUser = getOtherUserInfo();
-              const chatData: ChatData = {
-                chat: appData?.user?.chats[chat]!,
-                otherUserId: otherUser?.otherUserId || "",
-                otherUserName: otherUser?.otherUserName || "",
-                otherUserLastName: otherUser?.otherUserLastName || "",
-                otherUserAvatar: otherUser?.otherUserAvatar || "",
-              };
-
-              dispatch({
-                type: AppActionType.SET_CURRENT_CHAT,
-                payload: chatData,
-              });
-
-              router.navigate("/chat");
-            }
+            handleProfileTap();
           }}
         >
           <AvatarImage

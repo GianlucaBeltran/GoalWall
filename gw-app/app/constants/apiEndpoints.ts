@@ -18,7 +18,7 @@ export async function fetchUser({
   navigateCallBack: () => void;
 }) {
   try {
-    const response = await fetch(url + "/user", {
+    const response = await fetch(url + "/user/", {
       method: "POST",
       body: JSON.stringify(userLogin),
       headers: {

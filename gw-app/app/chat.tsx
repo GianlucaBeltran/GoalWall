@@ -50,6 +50,8 @@ export default function ChatScreen() {
             },
           ],
         },
+        userId: appData.user?.uid,
+        recipientId: appData.currentChat.otherUserId,
       });
     } else if (appData?.currentChat?.chat.status === "pending") {
       if (appData.currentChat.chat.creatorId !== appData?.user?.uid) {
@@ -60,6 +62,8 @@ export default function ChatScreen() {
             message: message.trim(),
             createdAt: new Date().toISOString(),
           },
+          userId: appData.user?.uid,
+          recipientId: appData.currentChat.otherUserId,
         });
       } else {
         appData.socket.emit("message", {
@@ -69,6 +73,8 @@ export default function ChatScreen() {
             message: message.trim(),
             createdAt: new Date().toISOString(),
           },
+          userId: appData.user?.uid,
+          recipientId: appData.currentChat.otherUserId,
         });
       }
     } else if (appData?.currentChat?.chat.status === "accepted") {
@@ -79,6 +85,8 @@ export default function ChatScreen() {
           message: message.trim(),
           createdAt: new Date().toISOString(),
         },
+        userId: appData.user?.uid,
+        recipientId: appData.currentChat.otherUserId,
       });
     }
     scrolViewRef.current?.scrollToEnd({ animated: true });
@@ -122,12 +130,7 @@ export default function ChatScreen() {
         marginLeft: -20,
       }}
     >
-      <ScreenView
-        title={`Chat (${
-          appData?.socket?.connected ? "connected" : "not connected"
-        })`}
-        touchableWithoutFeedback={false}
-      >
+      <ScreenView title={"Chat"} touchableWithoutFeedback={false}>
         {appData?.socket?.connected && appData?.currentChat && (
           <View
             style={{
@@ -203,6 +206,24 @@ export default function ChatScreen() {
                     {isOwner
                       ? "If the member chooses to accept your message request, their profile picture and full name will become visible to you."
                       : "If you reply, your profile picture and full name will become visible to the other member."}
+                  </Text>
+                </View>
+              )}
+              {appData.currentChat.chat.status === "accepted" && (
+                <View
+                  style={{
+                    // maxWidth: 219,
+                    paddingRight: 50,
+                    paddingLeft: 50,
+                    paddingBottom: 20,
+                  }}
+                >
+                  <Text
+                    style={{ fontSize: 16, opacity: 0.67, textAlign: "center" }}
+                  >
+                    This is the beginning of your conversation with{" "}
+                    {appData.currentChat.otherUserName}{" "}
+                    {appData.currentChat.otherUserLastName}.
                   </Text>
                 </View>
               )}

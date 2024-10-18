@@ -51,6 +51,7 @@ export default function RootLayout() {
     currentChat: null,
     notifications: [],
     chats: [],
+    newMessages: false,
   });
 
   useEffect(() => {
@@ -60,17 +61,13 @@ export default function RootLayout() {
   }, [loaded]);
 
   useEffect(() => {
-    if (!appData?.user || !dispatch) return;
-
-    console.log("setting socket");
+    if (!appData?.user || !dispatch || appData.socket?.connected) return;
 
     const socket = connectSocket(appData?.user?.uid);
     dispatch({
       type: AppActionType.SET_SOCKET,
       payload: socket,
     });
-
-    console.log("setting socket done", socket.connected);
 
     return () => {
       socket.disconnect();
@@ -84,21 +81,40 @@ export default function RootLayout() {
   useEffect(() => {
     if (!appData || !appData.socket) return;
 
-    function onConnect() {
-      console.log("connected");
+    function getOtherUserAvatar(chat: Chat, userId: string) {
+      return chat.users.find((user) => user.userId !== userId)
+        ?.userAvatarFileName;
+    }
+
+    function getOtherUserNames(chat: Chat, userId: string) {
+      return {
+        name: chat.users.find((user) => user.userId !== userId)?.userName,
+        lastName: chat.users.find((user) => user.userId !== userId)
+          ?.userLastName,
+      };
     }
 
     function onMessage(data: Chat) {
-      console.log(pathName);
       if (!appData || !appData.user) return;
-      console.log("message recieved");
+      if (pathName !== "/chat" && pathName !== "/messages") {
+        dispatch!({
+          type: AppActionType.SET_NEW_MESSAGE,
+          payload: true,
+        });
+      }
       if (pathName !== "/chat") {
         console.log("pushing notification");
+        const otherUser = getOtherUserNames(data, appData.user.uid);
         dispatch!({
           type: AppActionType.PUSH_NOTIFICATION,
           payload: {
             id: new Date().getTime().toString(),
-            data: data.messages[data.messages.length - 1].message,
+            data: {
+              message: data.messages[data.messages.length - 1].message,
+              avatarFileName: getOtherUserAvatar(data, appData.user.uid),
+              name: otherUser.name,
+              lastName: otherUser.lastName,
+            },
             type: "message",
           },
         });
@@ -112,13 +128,25 @@ export default function RootLayout() {
 
     function onMessageRequestRecieved(data: Chat) {
       if (!appData || !appData.user) return;
+      if (pathName !== "/chat" && pathName !== "/messages") {
+        dispatch!({
+          type: AppActionType.SET_NEW_MESSAGE,
+          payload: true,
+        });
+      }
 
-      if (pathName === "/chat") {
+      if (pathName !== "/chat") {
+        const otherUser = getOtherUserNames(data, appData.user.uid);
         dispatch!({
           type: AppActionType.PUSH_NOTIFICATION,
           payload: {
             id: new Date().getTime().toString(),
-            data: data.messages[data.messages.length - 1].message,
+            data: {
+              message: data.messages[data.messages.length - 1].message,
+              avatarFileName: getOtherUserAvatar(data, appData.user.uid),
+              name: otherUser.name,
+              lastName: otherUser.lastName,
+            },
             type: "messageRequest",
           },
         });
@@ -132,12 +160,24 @@ export default function RootLayout() {
 
     function onMessageRequestAccepted(data: Chat) {
       if (!appData || !appData.user) return;
-      if (pathName === "/chat") {
+      if (pathName !== "/chat" && pathName !== "/messages") {
+        dispatch!({
+          type: AppActionType.SET_NEW_MESSAGE,
+          payload: true,
+        });
+      }
+      if (pathName !== "/chat") {
+        const otherUser = getOtherUserNames(data, appData.user.uid);
         dispatch!({
           type: AppActionType.PUSH_NOTIFICATION,
           payload: {
             id: new Date().getTime().toString(),
-            data: data.messages[0].message,
+            data: {
+              message: data.messages[data.messages.length - 1].message,
+              avatarFileName: getOtherUserAvatar(data, appData.user.uid),
+              name: otherUser.name,
+              lastName: otherUser.lastName,
+            },
             type: "messageRequestAccepted",
           },
         });
@@ -151,10 +191,10 @@ export default function RootLayout() {
 
     async function onFetchChats() {
       if (!appData || !appData.user) return;
-      console.log("fetching chats");
+
       try {
         const response = await fetch(
-          appData.api + "/messages/" + appData.user?.uid,
+          appData.api + "/chat/" + appData.user?.uid,
           {
             method: "get",
             headers: {

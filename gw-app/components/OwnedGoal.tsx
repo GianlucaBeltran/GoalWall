@@ -39,7 +39,7 @@ export default function OwnedGoal({
 
     try {
       const response = await fetch(
-        appData?.api + "/comments/" + appData?.user?.uid + "/" + goal?.id,
+        appData?.api + "/comment/" + appData?.user?.uid + "/" + goal?.id,
         {
           method: "GET",
         }
@@ -64,11 +64,12 @@ export default function OwnedGoal({
     (async () => {
       try {
         const response = await fetch(
-          appData?.api + "/comments/" + appData?.user?.uid + "/" + goal?.id,
+          appData?.api + "/comment/" + appData?.user?.uid + "/" + goal?.id,
           {
             method: "GET",
           }
         );
+        console.log("ownedGoals");
         const data = await response.json();
         setComments(data.comments);
       } catch (error) {

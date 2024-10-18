@@ -30,7 +30,7 @@ export default function CardView({
         {children}
         <View>
           <Text style={{ color: "grey" }}>Group 16 🦚</Text>
-          <Text style={{ color: "grey" }}>Version 0.0.2</Text>
+          <Text style={{ color: "grey" }}>Version 0.1.0</Text>
         </View>
       </View>
     </View>

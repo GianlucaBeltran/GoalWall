@@ -65,13 +65,12 @@ export default function sharedGoals() {
 
     (async () => {
       try {
-        const response = await fetch(appData.api + "/goals", {
-          method: "POST",
-          body: JSON.stringify({ userId: appData.user?.uid }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(
+          appData.api + "/goal/sharedGoals/" + appData.user?.uid,
+          {
+            method: "GET",
+          }
+        );
         const data = await response.json();
         if (!data.goals) return;
         const sortedGoals = data.goals.sort((a: Goal, b: Goal) => {

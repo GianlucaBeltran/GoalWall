@@ -27,6 +27,7 @@ export interface AppData {
   notifications: Notification[];
   socket?: Socket;
   currentChat: ChatData | null;
+  newMessages: boolean;
 }
 
 export enum AppActionType {
@@ -43,6 +44,7 @@ export enum AppActionType {
   PUSH_NOTIFICATION,
   POP_NOTIFICATION,
   SET_SOCKET,
+  SET_NEW_MESSAGE,
 }
 
 export interface AppAction {
@@ -122,6 +124,11 @@ export function appDataReducer(appData: AppData, action: AppAction): AppData {
       return {
         ...appData,
         notifications: appData.notifications.slice(1),
+      };
+    case AppActionType.SET_NEW_MESSAGE:
+      return {
+        ...appData,
+        newMessages: action.payload as boolean,
       };
     case AppActionType.SET_SOCKET:
       return { ...appData, socket: action.payload as Socket };

@@ -15,7 +15,6 @@ import { AppContext } from "./context/appContext";
 import ChevronRightSVG from "@/components/svg/ChevronRightSVG";
 import { router } from "expo-router";
 import * as ScreenOrientation from "expo-screen-orientation";
-import SendSVG from "@/components/svg/SendSVG";
 import InboxSVG from "@/components/svg/InboxSVG";
 
 export default function mainMenu() {
@@ -28,7 +27,7 @@ export default function mainMenu() {
   }
 
   useEffect(() => {
-    changeScreenOrientation();
+    // changeScreenOrientation();
   }, []);
 
   return (
@@ -40,11 +39,7 @@ export default function mainMenu() {
             router.navigate("/messages");
           }}
         >
-          <InboxSVG
-            withNotification={
-              appData?.user?.chats && appData.user.chats.length > 0
-            }
-          />
+          <InboxSVG withNotification={appData?.newMessages} />
         </TouchableOpacity>
       }
     >

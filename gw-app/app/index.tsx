@@ -100,8 +100,8 @@ export default function Home() {
     shrinkButton();
 
     const userLogin = {
-      firstName,
-      lastName,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
     };
     console.log(appData?.api, "api");
     await fetchUser({

@@ -21,6 +21,7 @@ export interface Chat {
 }
 
 export interface Reaction {
+  reactionId: string;
   authorId: string;
   postId: string;
   type: "❤️" | "👏" | "💪" | "🔥";
@@ -61,7 +62,7 @@ export interface User {
   goals: Goal[];
   comments: Comment[];
   reactions: Reaction[];
-  chats: Chat[];
+  chatsIds: Chat[];
 }
 
 export interface SelectedItem {
