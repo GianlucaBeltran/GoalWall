@@ -21,7 +21,6 @@ import {
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import AvatarImage from "./AvatarImage";
-import { getAvatar } from "@/app/constants/avatars";
 import ReactionSVG from "./svg/ReactionSVG";
 import { router } from "expo-router";
 
@@ -168,7 +167,7 @@ export default function Post({
         >
           <AvatarImage
             size={postData.type === "goal" ? 39 : 30}
-            avatarImage={getAvatar(postData.data.avatarFileName)?.image}
+            avatarImage={postData.data.avatarFileName!}
             withShadow={false}
           />
         </TouchableOpacity>

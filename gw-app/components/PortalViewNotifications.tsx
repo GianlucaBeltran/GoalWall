@@ -18,7 +18,6 @@ import {
 } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import AvatarImage from "./AvatarImage";
-import { getAvatar } from "@/app/constants/avatars";
 
 export default function PortalViewNotifications() {
   const dispatch = useContext(AppDispatchContext);
@@ -132,10 +131,7 @@ export default function PortalViewNotifications() {
               <Animated.View style={[animatedStyle]}>
                 <AvatarImage
                   size={30}
-                  avatarImage={
-                    getAvatar(appData.notifications[0].data.avatarFileName)
-                      ?.image
-                  }
+                  avatarImage={appData.notifications[0].data.avatarFileName}
                 />
                 <View style={{ justifyContent: "center", flex: 1 }}>
                   <Text style={{ fontSize: 12, color: "white" }}>

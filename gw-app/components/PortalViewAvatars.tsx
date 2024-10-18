@@ -1,5 +1,5 @@
-import { View, StyleSheet, TouchableOpacity } from "react-native";
-import React, { Dispatch, useContext } from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { Dispatch, useContext, useEffect, useState } from "react";
 import { Portal } from "react-native-portalize";
 
 import { BlurView } from "expo-blur";
@@ -9,9 +9,7 @@ import {
   AppContext,
   AppDispatchContext,
 } from "@/app/context/appContext";
-import { AvatarButton } from "@/app/avatar";
-import Avatars from "@/app/constants/avatars";
-import { Avatar } from "@/app/types/avatar.types";
+import AvatarPicker from "./AvatarPicker";
 
 export default function PortalViewAvatars({
   enabled,
@@ -23,13 +21,16 @@ export default function PortalViewAvatars({
   const dispatch = useContext(AppDispatchContext);
   const appData = useContext(AppContext);
 
-  const handleAvatarSelection = async (avatar: Avatar) => {
+  const [avatars, setAvatars] = useState<string[]>([]);
+  const [scrollIndex, setScrollIndex] = useState(0);
+
+  const handleAvatarSelection = async (avatar: string) => {
     if (!dispatch) return;
 
-    if (appData?.user?.avatarFileName === avatar.fileName) return;
+    if (appData?.user?.avatarFileName === avatar) return;
     try {
       const body = {
-        avatarFileName: avatar.fileName,
+        avatarFileName: avatar,
       };
       const response = await fetch(
         appData?.api + "/user/setAvatar/" + appData?.user?.uid,
@@ -64,50 +65,21 @@ export default function PortalViewAvatars({
             <TouchableOpacity
               activeOpacity={1}
               onPress={() => setEnabled(false)}
-              style={[styles.container]}
+              style={[
+                styles.container,
+                { justifyContent: "center", alignItems: "center", padding: 20 },
+              ]}
             >
-              <View
+              <TouchableOpacity
+                activeOpacity={1}
                 style={{
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: 30,
+                  flex: 0.5,
+                  backgroundColor: "white",
+                  borderRadius: 20,
                 }}
               >
-                <View style={styles.avatarsContainer}>
-                  {Avatars.slice(0, 2).map((avatar) => (
-                    <AvatarButton
-                      key={avatar.id}
-                      dispatch={dispatch}
-                      avatar={avatar}
-                      appDataAvatar={appData?.editingData?.avatar}
-                      callBack={() => handleAvatarSelection(avatar)}
-                    />
-                  ))}
-                </View>
-                <View style={styles.avatarsContainer}>
-                  {Avatars.slice(2, 5).map((avatar) => (
-                    <AvatarButton
-                      key={avatar.id}
-                      dispatch={dispatch}
-                      avatar={avatar}
-                      appDataAvatar={appData?.editingData?.avatar}
-                      callBack={() => handleAvatarSelection(avatar)}
-                    />
-                  ))}
-                </View>
-                <View style={styles.avatarsContainer}>
-                  {Avatars.slice(5, 7).map((avatar) => (
-                    <AvatarButton
-                      key={avatar.id}
-                      dispatch={dispatch}
-                      avatar={avatar}
-                      appDataAvatar={appData?.editingData?.avatar}
-                      callBack={() => handleAvatarSelection(avatar)}
-                    />
-                  ))}
-                </View>
-              </View>
+                <AvatarPicker handleAvatarSelection={handleAvatarSelection} />
+              </TouchableOpacity>
             </TouchableOpacity>
           </BlurView>
         </Portal>

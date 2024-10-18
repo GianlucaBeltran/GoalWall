@@ -1,7 +1,6 @@
 import {
   createRef,
   Dispatch,
-  LegacyRef,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -9,17 +8,10 @@ import {
 } from "react";
 import { socket } from "./helpers/socket";
 import { Goal } from "./types/data.types";
-import {
-  motion,
-  useAnimate,
-  useAnimationFrame,
-  useMotionValue,
-  useTime,
-  useTransform,
-} from "framer-motion";
-import { v4 as uuidv4 } from "uuid";
+import { motion, useAnimationFrame } from "framer-motion";
 
 import "./App.css";
+import { urlHome } from "./constants/apiEndpoints";
 
 const categories: Record<string, { id: string; name: string; color: string }> =
   {
@@ -128,7 +120,7 @@ function GoalItem({
     >
       <p className="goal-title">{goal.description}</p>
       <div className="bottom-part">
-        <img src={"/" + goal.avatarFileName} alt={goal.description} />
+        <img src={urlHome + "/user/avatar/" + goal.avatarFileName} />
         <div className="reactions">
           {goal.reactions.map((reaction, index) => (
             <p key={index}>{reaction.type}</p>

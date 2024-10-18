@@ -14,7 +14,6 @@ import {
 import React, { Dispatch, useContext, useEffect, useState } from "react";
 import { Portal } from "react-native-portalize";
 import AvatarImage from "./AvatarImage";
-import { getAvatar } from "@/app/constants/avatars";
 import { formatedDate } from "@/app/helpers/dateFormating";
 import SendSVG from "./svg/SendSVG";
 import { Comment, Goal, SelectedItem } from "@/app/types/data.types";
@@ -149,10 +148,7 @@ export default function PortalViewReply({
                     >
                       <AvatarImage
                         size={39}
-                        avatarImage={
-                          getAvatar(selectedItem.parentGoal?.avatarFileName)
-                            ?.image
-                        }
+                        avatarImage={selectedItem.parentGoal?.avatarFileName!}
                         withShadow={false}
                       />
 
@@ -210,9 +206,7 @@ export default function PortalViewReply({
                   >
                     <AvatarImage
                       size={39}
-                      avatarImage={
-                        getAvatar(selectedItem.avatarFileName)?.image
-                      }
+                      avatarImage={selectedItem.avatarFileName!}
                       withShadow={false}
                     />
 

@@ -17,7 +17,6 @@ import ExclamationSVG from "@/components/svg/ExclamationSVG";
 import GoalSVG from "@/components/svg/GoalSVG";
 import WriteSVG from "@/components/svg/WriteSVG";
 import { AppContext } from "./context/appContext";
-import { getAvatar } from "./constants/avatars";
 import { Comment, Goal, Category, SelectedItem } from "./types/data.types";
 import AvatarImage from "@/components/AvatarImage";
 import { Host } from "react-native-portalize";
@@ -87,7 +86,7 @@ export default function sharedGoals() {
                 }}
               >
                 <AvatarImage
-                  avatarImage={getAvatar(appData?.user?.avatarFileName)?.image}
+                  avatarImage={appData?.user?.avatarFileName!}
                   size={118}
                 />
               </TouchableOpacity>

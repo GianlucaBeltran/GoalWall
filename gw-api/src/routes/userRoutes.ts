@@ -1,6 +1,8 @@
 import express from "express";
 import { v4 as uuidv4 } from "uuid";
-import { findUser, readFile } from "../models/readData";
+import fs from "fs";
+import path from "path";
+import { readFile } from "../models/readData";
 import {
   commentFilePath,
   goalFilePath,
@@ -32,7 +34,11 @@ userRoutes.post("/", async (req, res) => {
     userFromRequest.firstName,
     userFromRequest.lastName
   );
-  console.log(user ? "User already exists" : "New user");
+  console.log(
+    user.getName() + " " + user.getLastName()
+      ? "User already exists"
+      : "New user"
+  );
 
   if (user) {
     const goalsJson = await readFile<Record<string, IGoal>>(goalFilePath);
@@ -74,6 +80,26 @@ userRoutes.post("/", async (req, res) => {
   newUser.setGoalsObjects([]);
 
   res.send({ user: newUser });
+});
+
+userRoutes.get("/avatar/:fileName", (req, res) => {
+  const fileName = req.params.fileName;
+
+  console.log("Sending avatar to app");
+
+  res.sendFile(path.resolve("src/assets/images/" + fileName));
+});
+
+userRoutes.get("/avatars", (req, res) => {
+  const files = fs.readdirSync(path.resolve("src/assets/images"));
+  files.sort(
+    (a, b) =>
+      Number(a.split(".")[0].split("avatar")[1]) -
+      Number(b.split(".")[0].split("avatar")[1])
+  );
+
+  console.log("Sending avatars to app", files.length);
+  res.send({ images: files });
 });
 
 userRoutes.get("/:id", async (req, res) => {

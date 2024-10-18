@@ -1,7 +1,6 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import { Chat, DirectMessage } from "../app/types/data.types";
 import AvatarImage from "./AvatarImage";
-import { getAvatar } from "@/app/constants/avatars";
 import { formatedDate } from "@/app/helpers/dateFormating";
 import ChevronRightSVG from "./svg/ChevronRightSVG";
 import { AppActionType, AppDispatchContext } from "@/app/context/appContext";
@@ -58,7 +57,7 @@ export default function MessageComponent({
       {!messageData.isOwner && (
         <AvatarImage
           size={39}
-          avatarImage={getAvatar(messageData.userAvatarFileName)?.image}
+          avatarImage={messageData.userAvatarFileName}
           withShadow={false}
         />
       )}

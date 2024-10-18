@@ -12,7 +12,6 @@ import {
 import { AppContext } from "./context/appContext";
 import ScreenView from "@/components/ScreenView";
 import AvatarImage from "@/components/AvatarImage";
-import { getAvatar } from "./constants/avatars";
 import SendDmSVG from "@/components/svg/SendDmSVG";
 
 import MessageComponent from "@/components/MessageComponent";
@@ -160,9 +159,7 @@ export default function ChatScreen() {
                 }}
               >
                 <AvatarImage
-                  avatarImage={
-                    getAvatar(appData?.currentChat.otherUserAvatar)?.image
-                  }
+                  avatarImage={appData?.currentChat.otherUserAvatar}
                   size={80}
                   withShadow={false}
                 />

@@ -18,7 +18,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
 import AvatarImage from "./AvatarImage";
-import { getAvatar } from "@/app/constants/avatars";
 import { formatedDate } from "@/app/helpers/dateFormating";
 import EditSVG from "./svg/EditSVG";
 import CloseSVG from "./svg/CloseSVG";
@@ -257,7 +256,7 @@ export default function PortalViewPost({
   };
 
   useEffect(() => {
-    if (!appData || !dispatch) return;
+    if (!appData || !dispatch || !selectedItem) return;
     (async () => {
       try {
         const response = await fetch(
@@ -462,9 +461,7 @@ export default function PortalViewPost({
                   {!selectedItem.owned && (
                     <AvatarImage
                       size={39}
-                      avatarImage={
-                        getAvatar(selectedItem.avatarFileName)?.image
-                      }
+                      avatarImage={selectedItem.avatarFileName!}
                       withShadow={false}
                     />
                   )}

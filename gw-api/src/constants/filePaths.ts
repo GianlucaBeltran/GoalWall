@@ -1,11 +1,9 @@
-export const usersFilePath =
-  "/Users/gianlucabeltran/KTH/1Sem/GoalWall/gw-api/src/data/users.json";
+import path from "path";
 
-export const goalFilePath =
-  "/Users/gianlucabeltran/KTH/1Sem/GoalWall/gw-api/src/data/goals.json";
+export const usersFilePath = path.resolve("src/data/users.json");
 
-export const commentFilePath =
-  "/Users/gianlucabeltran/KTH/1Sem/GoalWall/gw-api/src/data/comments.json";
+export const goalFilePath = path.resolve("src/data/goals.json");
 
-export const chatFilePath =
-  "/Users/gianlucabeltran/KTH/1Sem/GoalWall/gw-api/src/data/chats.json";
+export const commentFilePath = path.resolve("src/data/comments.json");
+
+export const chatFilePath = path.resolve("src/data/chats.json");

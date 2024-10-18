@@ -1,3 +1,5 @@
+import { AppContext } from "@/app/context/appContext";
+import { useContext } from "react";
 import { View, Image, ImageSourcePropType } from "react-native";
 
 export default function AvatarImage({
@@ -5,10 +7,12 @@ export default function AvatarImage({
   size,
   withShadow = true,
 }: {
-  avatarImage: ImageSourcePropType;
+  avatarImage: string;
   size: number;
   withShadow?: boolean;
 }) {
+  const appData = useContext(AppContext);
+
   return (
     <View
       style={{
@@ -23,7 +27,7 @@ export default function AvatarImage({
       }}
     >
       <Image
-        source={avatarImage}
+        source={{ uri: appData?.api + "/user/avatar/" + avatarImage }}
         style={{
           width: size,
           height: size,

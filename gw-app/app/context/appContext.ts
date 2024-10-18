@@ -5,7 +5,7 @@ import { Socket } from "socket.io-client";
 
 interface EditingData {
   goal?: Goal | null;
-  avatar?: Avatar | null;
+  avatar?: string | null;
 }
 
 export interface ChatData {
@@ -53,7 +53,6 @@ export interface AppAction {
     | User
     | Goal
     | Goal[]
-    | Avatar
     | boolean
     | string
     | null
@@ -91,7 +90,7 @@ export function appDataReducer(appData: AppData, action: AppAction): AppData {
         ...appData,
         editingData: {
           ...appData.editingData,
-          avatar: action.payload as Avatar,
+          avatar: action.payload as string,
         },
       };
     case AppActionType.SET_EDITING_GOAL:

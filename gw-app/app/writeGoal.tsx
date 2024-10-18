@@ -18,7 +18,6 @@ import {
 } from "./context/appContext";
 import { Goal } from "./types/data.types";
 import ScreenView from "@/components/ScreenView";
-import { getAvatar } from "./constants/avatars";
 import AvatarImage from "@/components/AvatarImage";
 
 interface Category {
@@ -110,8 +109,8 @@ export default function setGoals() {
     const requestBody = {
       goal,
       userId: appData.user.uid,
-      avatarFileName: appData.editingData?.avatar?.fileName
-        ? appData.editingData.avatar.fileName
+      avatarFileName: appData.editingData?.avatar
+        ? appData.editingData.avatar
         : undefined,
     };
 
@@ -253,9 +252,9 @@ export default function setGoals() {
       >
         <AvatarImage
           avatarImage={
-            appData?.editingData?.avatar?.image
-              ? appData.editingData.avatar.image
-              : getAvatar(appData?.user?.avatarFileName)?.image
+            appData?.editingData?.avatar
+              ? appData.editingData.avatar
+              : appData?.user?.avatarFileName!
           }
           size={100}
         />

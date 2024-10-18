@@ -22,7 +22,6 @@ import { router } from "expo-router";
 import { Goal, SelectedItem } from "./types/data.types";
 import { AppContext } from "./context/appContext";
 import AvatarImage from "@/components/AvatarImage";
-import { getAvatar } from "./constants/avatars";
 import { formatedDate } from "./helpers/dateFormating";
 import Animated, {
   Easing,
@@ -175,7 +174,7 @@ function GoalItem({
       >
         <AvatarImage
           size={39}
-          avatarImage={getAvatar(goal.avatarFileName)?.image}
+          avatarImage={goal.avatarFileName!}
           withShadow={false}
         />
         <View style={{ justifyContent: "space-between", gap: 3 }}>
