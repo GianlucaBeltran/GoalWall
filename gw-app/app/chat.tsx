@@ -209,6 +209,24 @@ export default function ChatScreen() {
                   </Text>
                 </View>
               )}
+              {appData.currentChat.chat.status === "accepted" && (
+                <View
+                  style={{
+                    // maxWidth: 219,
+                    paddingRight: 50,
+                    paddingLeft: 50,
+                    paddingBottom: 20,
+                  }}
+                >
+                  <Text
+                    style={{ fontSize: 16, opacity: 0.67, textAlign: "center" }}
+                  >
+                    This is the beginning of your conversation with{" "}
+                    {appData.currentChat.otherUserName}{" "}
+                    {appData.currentChat.otherUserLastName}.
+                  </Text>
+                </View>
+              )}
 
               {appData.currentChat.chat.messages.map((message, index) => (
                 <MessageComponent

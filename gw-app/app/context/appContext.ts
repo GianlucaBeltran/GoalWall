@@ -77,7 +77,6 @@ export function useAppContext() {
 export function appDataReducer(appData: AppData, action: AppAction): AppData {
   switch (action.type) {
     case AppActionType.SET_USER:
-      console.log("Setting user", action.payload);
       return {
         ...appData,
         user: action.payload as User,

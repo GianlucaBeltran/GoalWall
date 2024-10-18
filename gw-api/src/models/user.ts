@@ -453,6 +453,15 @@ export class Goals {
     );
   }
 
+  getGoalsArrayWithAvatar(users: Users): Goal[] {
+    return Object.values(this.goals).map((goal) => {
+      goal.setAvatarFileName(
+        users.users[goal.getAuthorId()].getAvatarFileName()
+      );
+      return goal;
+    });
+  }
+
   getGoalsArray(): Goal[] {
     return Object.values(this.goals);
   }

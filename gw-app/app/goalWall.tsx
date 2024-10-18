@@ -9,7 +9,14 @@ import {
   GestureResponderEvent,
 } from "react-native";
 import * as ScreenOrientation from "expo-screen-orientation";
-import { Dispatch, useContext, useEffect, useState } from "react";
+import {
+  Dispatch,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import ChevronLeftSVG from "@/components/svg/ChevronLeftSVG";
 import { router } from "expo-router";
 import { Goal, SelectedItem } from "./types/data.types";
@@ -19,8 +26,12 @@ import { getAvatar } from "./constants/avatars";
 import { formatedDate } from "./helpers/dateFormating";
 import Animated, {
   Easing,
+  measure,
   runOnJS,
+  runOnUI,
+  useAnimatedRef,
   useAnimatedStyle,
+  useFrameCallback,
   useSharedValue,
   withRepeat,
   withTiming,
@@ -29,22 +40,72 @@ import { Host } from "react-native-portalize";
 import PortalViewPost from "@/components/PortalViewPosts";
 import * as Haptics from "expo-haptics";
 
+const categories: Record<string, { id: string; name: string; color: string }> =
+  {
+    "+ Create a category": {
+      id: "0",
+      name: "+ Create a category",
+      color: "red",
+    },
+    Wellness: {
+      id: "1",
+      name: "Wellness",
+      color: "white",
+    },
+    Strength: {
+      id: "2",
+      name: "Strength",
+      color: "#FF8C96",
+    },
+    Flexibility: {
+      id: "3",
+      name: "Flexibility",
+      color: "#BAF3FF",
+    },
+    "Mental health": {
+      id: "4",
+      name: "Mental health",
+      color: "#FFE681",
+    },
+
+    Motivation: {
+      id: "5",
+      name: "Motivation",
+      color: "#FFC7E0",
+    },
+    Recovery: {
+      id: "6",
+      name: "Recovery",
+      color: "#C3FF8B",
+    },
+  };
+
 function GoalItem({
   goal,
-  index,
+  goalIndex,
   setFinishedGoal,
-  startAnimation,
+  setCanPushNew,
 }: {
   goal: Goal;
-  index: number;
-  setFinishedGoal: Dispatch<React.SetStateAction<Goal | null>>;
-  startAnimation?: boolean;
+  goalIndex: number;
+  setFinishedGoal: Dispatch<React.SetStateAction<boolean>>;
+  setCanPushNew: Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const [goalWidth, setGoalWidth] = useState<number | null>(null);
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
   const [itemCoordinates, setItemCoordinates] = useState({ x: 0, y: 0 });
-  const [finished, setFinished] = useState(false);
-  const offset = useSharedValue(Dimensions.get("screen").width + 30);
+  const [screenWidth, setScreenWidth] = useState<number | null>();
+
+  const goalPosition = useSharedValue(1000);
+
+  const [goalWidth, setGoalWidth] = useState<number | undefined>();
+  const [pushed, setPushed] = useState(false);
+
+  const goalColor =
+    goal.categories &&
+    goal.categories.length > 0 &&
+    categories[goal.categories[0].name]
+      ? categories[goal.categories[0].name].color
+      : "#81ffd1";
 
   const onLongPress = (e: GestureResponderEvent) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -67,64 +128,34 @@ function GoalItem({
   // const offset = useSharedValue(0);
 
   const animatedStyles = useAnimatedStyle(() => ({
-    transform: [{ translateX: offset.value }],
+    transform: [{ translateX: goalPosition.value }],
     position: "absolute",
-    // flex: 1,
     justifyContent: "center",
-    // width: 300,
     flexDirection: "row",
     alignItems: "center",
-    // padding: 10,
-    // gap: 10,
   }));
 
   const onLayout = (event: LayoutChangeEvent) => {
     const { x, y, width, height } = event.nativeEvent.layout;
-
+    goalPosition.value = Dimensions.get("screen").width + 30;
+    setScreenWidth(Dimensions.get("screen").width);
     setGoalWidth(width);
   };
 
-  useEffect(() => {
-    if (!goalWidth) return;
-    offset.value = Dimensions.get("screen").width + 30;
-    if (!startAnimation) return;
-    // setTimeout(() => {
-    //   offset.value = withRepeat(
-    //     withTiming(
-    //       -Dimensions.get("screen").width,
-    //       {
-    //         duration: 15000,
-    //         easing: Easing.linear,
-    //       },
-    //       (finished) => {
-    //         if (finished) {
-    //           // setGoalFinished(goal);
-    //         }
-    //       }
-    //     ),
-    //     -1,
-    //     false
-    //   );
-    // }, Math.random() * 2000 + index * 5000 + goalWidth);
-    setTimeout(() => {
-      offset.value = withTiming(
-        // -Dimensions.get("screen").width,
-        -goalWidth,
-        {
-          duration: 15000,
-          easing: Easing.linear,
-        },
-        (finished) => {
-          if (finished) {
-            runOnJS(setFinishedGoal)(goal);
-            runOnJS(setFinished)(true);
-          }
-        }
-      );
-    }, Math.random() * 2000 + index * 5000 + goalWidth);
-  }, [goalWidth, startAnimation, setFinished]);
-
   const postReactions = new Set(goal.reactions.map((r) => r.type));
+
+  useFrameCallback((frameInfo) => {
+    if (!goalWidth || !screenWidth) return;
+
+    if (goalPosition.value > -(goalWidth + screenWidth)) {
+      goalPosition.value -= 1;
+    }
+    if (pushed) return;
+    if (goalPosition.value < -goalWidth) {
+      runOnJS(setPushed)(true);
+      runOnJS(setCanPushNew)(true);
+    }
+  });
 
   return (
     <Animated.View style={animatedStyles} key={goal.id} onLayout={onLayout}>
@@ -203,49 +234,51 @@ function GoalItem({
 }
 
 function GoalPathContainer({ goals }: { goals: Goal[] }) {
-  const [goalWidth, setGoalWidth] = useState<number | null>(null);
-  const [animatingGoals, setAnimatingGoals] = useState<Goal[]>(goals);
-  const [finishedGoal, setGoalFinished] = useState<Goal | null>(null);
-  const [currenIndex, setCurrentIndex] = useState(0);
-
-  const onLayout = (event: LayoutChangeEvent) => {
-    const { x, y, width, height } = event.nativeEvent.layout;
-    setGoalWidth(width);
-  };
-
-  // useEffect(() => {
-  //   if (goals.length > 3) {
-  //     setAnimatingGoals(goals.slice(currenIndex, currenIndex + 3));
-  //   } else {
-  //     setAnimatingGoals(goals);
-  //   }
-  // }, []);
+  const [animatingGoals, setAnimatingGoals] = useState<Goal[]>([]);
+  const [finishedGoal, setFinishedGoal] = useState<boolean>(false);
+  const [canPushNew, setCanPushNew] = useState(false);
+  const [currentIndex, setCurrenIndex] = useState(0);
 
   useEffect(() => {
-    if (!goalWidth) return;
-    if (finishedGoal) {
-      console.log("finishedGoal", finishedGoal.description);
-      setAnimatingGoals((prev) => {
-        const removedGoal = prev.shift();
-        prev.push(removedGoal!);
-        return prev;
-      });
+    if (animatingGoals.length) return;
+    setAnimatingGoals(goals.slice(0, 1));
+    setCurrenIndex(1);
+  }, [goals, animatingGoals]);
 
-      setGoalFinished(null);
+  useEffect(() => {
+    if (finishedGoal) {
+      setAnimatingGoals(animatingGoals.slice(1));
+      setFinishedGoal(false);
     }
   }, [finishedGoal]);
 
+  useEffect(() => {
+    if (goals.length < 2) return;
+    if (canPushNew) {
+      console.log("pushing", goals[currentIndex % goals.length].description);
+      setAnimatingGoals([
+        ...animatingGoals,
+        goals[currentIndex % goals.length],
+      ]);
+      setCanPushNew(false);
+      setCurrenIndex((currentIndex % goals.length) + 1);
+    }
+  }, [canPushNew]);
+
   return (
-    <View style={{ flex: 1, flexDirection: "row" }} onLayout={onLayout}>
-      {animatingGoals.map((goal, index) => (
-        <GoalItem
-          goal={goal}
-          key={goal.id}
-          index={index}
-          setFinishedGoal={setGoalFinished}
-          startAnimation={animatingGoals[0].id === goal.id}
-        />
-      ))}
+    <View style={{ flex: 1, flexDirection: "row" }}>
+      {animatingGoals.length !== 0 &&
+        animatingGoals
+          .slice(0, 1)
+          .map((goal, index) => (
+            <GoalItem
+              key={goal.id}
+              goal={goal}
+              setFinishedGoal={setFinishedGoal}
+              setCanPushNew={setCanPushNew}
+              goalIndex={index}
+            />
+          ))}
     </View>
   );
 }
@@ -264,7 +297,11 @@ export default function GoalWall() {
 
   useEffect(() => {
     Dimensions.addEventListener("change", () => {
-      setScreenWidth(Dimensions.get("screen").width);
+      ScreenOrientation.getOrientationAsync().then((value) => {
+        if (value === ScreenOrientation.Orientation.LANDSCAPE_RIGHT) {
+          setScreenWidth(Dimensions.get("screen").width);
+        }
+      });
     });
   }, []);
 
@@ -294,9 +331,10 @@ export default function GoalWall() {
     };
   }, []);
 
-  const goalsPerPath = Math.round(goals.length / 4);
-
-  const paths = Array.from({ length: 4 }, (_, i) => {
+  const numberOfPaths = goals.length < 4 ? goals.length : 4;
+  const goalsPerPath = goals.length / numberOfPaths;
+  console.log(goalsPerPath, "test", numberOfPaths, screenWidth, goals.length);
+  const paths = Array.from({ length: numberOfPaths }, (_, i) => {
     return goals.slice(i * goalsPerPath, (i + 1) * goalsPerPath);
   });
 
@@ -305,25 +343,26 @@ export default function GoalWall() {
       source={require("../assets/images/backgroundImageRotated.png")}
       style={styles.imageBackground}
     >
-      {screenWidth && (
-        <Host>
-          <View style={styles.container}>
-            <View style={{ margin: 20, marginLeft: 60, marginBottom: 5 }}>
-              <TouchableOpacity onPress={() => router.back()}>
-                <ChevronLeftSVG />
-              </TouchableOpacity>
-            </View>
-            {goals.length !== 0 && (
-              <View style={styles.goalsContainer}>
-                <GoalPathContainer goals={paths[0]} />
-                <GoalPathContainer goals={paths[1]} />
-                <GoalPathContainer goals={paths[2]} />
-                <GoalPathContainer goals={paths[3]} />
-              </View>
-            )}
+      {/* {screenWidth && ( */}
+      <Host>
+        <View style={styles.container}>
+          <View style={{ margin: 20, marginLeft: 60, marginBottom: 5 }}>
+            <TouchableOpacity onPress={() => router.back()}>
+              <ChevronLeftSVG />
+            </TouchableOpacity>
           </View>
-        </Host>
-      )}
+          {goals.length !== 0 && (
+            <View style={styles.goalsContainer}>
+              <>
+                {paths.map((path, index) => (
+                  <GoalPathContainer key={index} goals={path} />
+                ))}
+              </>
+            </View>
+          )}
+        </View>
+      </Host>
+      {/* )} */}
     </ImageBackground>
   );
 }

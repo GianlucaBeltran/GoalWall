@@ -18,6 +18,7 @@ import {
   Users,
 } from "../models/user";
 import { writeData } from "../models/insertData";
+import { io } from "..";
 
 const goalRoutes = express.Router();
 
@@ -76,6 +77,11 @@ goalRoutes.post("/", async (req, res) => {
     );
     await writeData(goalFilePath, goalsObject.getGoals());
 
+    io.to("goalWallScreen").emit(
+      "goals",
+      goalsObject.getGoalsArrayWithAvatar(usersObject)
+    );
+
     for (const goal of goalsObject.getGoalsArray()) {
       goal.setCommentsObjects(
         commentsObject.findCommentsByGoalId(goal.getGoalId())
@@ -103,6 +109,11 @@ goalRoutes.post("/", async (req, res) => {
     goalsObject.addGoal(goalObject);
     userFromData.addGoal(goalObject.getGoalId());
     await writeData(usersFilePath, usersObject.users);
+
+    io.to("goalWallScreen").emit(
+      "goals",
+      goalsObject.getGoalsArrayWithAvatar(usersObject)
+    );
   }
 
   await writeData(goalFilePath, goalsObject.getGoals());

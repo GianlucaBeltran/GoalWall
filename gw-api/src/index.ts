@@ -2,7 +2,11 @@ import express from "express";
 import { DirectMessage } from "./models/api.types";
 import { readFile } from "./models/readData";
 import { writeData } from "./models/insertData";
-import { chatFilePath, usersFilePath } from "./constants/filePaths";
+import {
+  chatFilePath,
+  goalFilePath,
+  usersFilePath,
+} from "./constants/filePaths";
 import { Server } from "socket.io";
 import { createServer } from "http";
 import userRoutes from "./routes/userRoutes";
@@ -10,13 +14,13 @@ import goalRoutes from "./routes/goalRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import reactionRoutes from "./routes/reactionRoutes";
 import messageRoutes from "./routes/messageRoutes";
-import { Chat, Chats, IChat, IUser, Users } from "./models/user";
+import { Chat, Chats, Goals, IChat, IGoal, IUser, Users } from "./models/user";
 
 const app = express();
 app.use(express.json());
 
 const httpServer = createServer(app);
-const io = new Server(httpServer, {
+export const io = new Server(httpServer, {
   cors: {
     origin: "*",
   },
@@ -24,11 +28,20 @@ const io = new Server(httpServer, {
 
 const port = 3000;
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
   console.log("a user connected");
   socket.data = { userId: socket.handshake.auth.userId };
   socket.join(socket.handshake.auth.userId);
   console.log("User joined room", socket.handshake.auth.userId);
+
+  if (socket.data.userId === "goalWallScreen") {
+    const userJson = await readFile<Record<string, IUser>>(usersFilePath);
+    const goalsJson = await readFile<Record<string, IGoal>>(goalFilePath);
+    const usersObject = new Users(userJson);
+    const goalsObject = new Goals(goalsJson);
+
+    socket.emit("goals", goalsObject.getGoalsArrayWithAvatar(usersObject));
+  }
 
   socket.on(
     "messageRequest",
@@ -111,7 +124,6 @@ io.on("connection", (socket) => {
       userId: string;
       recipientId: string;
     }) => {
-      const userJson = await readFile<Record<string, IUser>>(usersFilePath);
       const chatsJson = await readFile<Record<string, IChat>>(chatFilePath);
 
       const chatsObject = new Chats(chatsJson);
