@@ -1,6 +1,41 @@
 # GoalWall
 (DM2601) Repository for Group 16 prototype
 
+## Running locally
+
+These instructions are made with mac in mind as stated in the assigment instructions.
+
+Before running, ensure that [Node.js is installed](https://nodejs.org/en/download/package-manager) in the computer. Node.js 0.10 or higher is required.
+
+## Cloning the repo
+1. Open the terminal
+2. Clone the repository in whichever folder you choose: `git clone https://github.com/GianlucaBeltran/GoalWall.git` using https or `git@github.com:GianlucaBeltran/GoalWall.git` using ssh.
+3. Once cloned cd into the Goal Wall directory: `cd GoalWall`
+
+## Running the api (gw-api)
+1. cd into gw-api: `cd gw-api`
+2. Run: `npm install` to download all the node packages
+3. Run: `npm run dev` this will start the api server, the terminal should output `Express is listening at http://localhost:3000`
+> **_IMPORTANT:_** Do not close the terminal tab, it will shut down the server, the server needs to be up for the app and the goal screen to fetch all the information they need
+
+## Running the app (gw-app)
+> **_NOTE:_** The app was developed mainly for iphone, very little to no testing was done on android devices
+1. Install [Expo go](https://expo.dev/go) in your mobile device
+2. Create an account in Expo go
+3. cd into gw-app: `cd gw-app`
+4. Run: `npm install` to download all the node packages
+5. Run: `npx expo start --no-dev --minify` (`--no-dev` and `--minify` flags are not needed but they ensure a better experience for the user using the app)
+6. The terminal should have printed a QR code, scan it with your phone camera, expo go should open and load the app
+> **_NOTE:_** If the app crashes for some reason, or a red error message is displayed, you can press r in the terminal running expo go, to reload the app
+
+## Running the screen (gw-screen)
+> **_NOTE:_** The screen was developed using chrome. No testing has been done in other browsers. This shouldn't be an issue, but it is good to keep in mind.
+1. cd into gw-screen: `cd gw-screen`
+2. Run: `npm install`
+3. Run: `npm start`
+4. A browser tab should open and the goals should start animating on screen
+> **_EASTER EGGS:_** There is some interaction to be had with the screen, although it's main purpose is to just visualize the goals. Check the [Screen section](#easter-eggs) for more information.
+
 ## Main frameworks used
 [Express](https://www.npmjs.com/package/express) and [socket.io](https://www.npmjs.com/package/socket.io) for the api (gw-api).
 
@@ -47,7 +82,7 @@ This is the main focus of the code. The app was built using React native and Exp
 
 There is a lot to go over with the app, so in summary, it is built using mainly Stacks for screen navigation and all the images are being fetched from the api like previously stated. 
 
-### Screen (gw-screen)
+### Screen (gw-screen) {#easter-eggs}
 
 This is the goall screen, our main way of displayig everyones goals. It is built using React and the animations are done using the [Framer motion library](https://www.npmjs.com/package/framer-motion). This is the most basic code of the project since it just handles data visualisation, there is little interaction. There are little easter eggs that a user could do though.
 
