@@ -23,6 +23,7 @@ import * as Haptics from "expo-haptics";
 import AvatarImage from "./AvatarImage";
 import ReactionSVG from "./svg/ReactionSVG";
 import { router } from "expo-router";
+import ReactionsDisplay from "./ReactionsDisplay";
 
 export default function Post({
   postData,
@@ -67,7 +68,10 @@ export default function Post({
     }
   };
 
-  const handleLongPress = (e: GestureResponderEvent) => {
+  const handleLongPress = (
+    e: GestureResponderEvent,
+    reactionButton = false
+  ) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
     if (!onLongPress) return;
 
@@ -78,6 +82,7 @@ export default function Post({
         isGoal: true,
         avatarFileName: postData.data.avatarFileName,
         origin,
+        reactionButton,
       });
     } else if (postData.type === "comment") {
       onLongPress(e, {
@@ -86,6 +91,7 @@ export default function Post({
         isGoal: false,
         avatarFileName: postData.data.avatarFileName,
         origin,
+        reactionButton,
       });
     }
   };
@@ -113,7 +119,7 @@ export default function Post({
         console.log(error, "error");
       }
     })();
-  }, [appData]);
+  }, []);
 
   const postReactions = new Set(postData.data.reactions?.map((r) => r.type));
 
@@ -217,29 +223,13 @@ export default function Post({
               </TouchableOpacity>
             )}
             {postData.data.reactions && (
-              <>
-                {Array.from(postReactions).map((reaction: string, index) => {
-                  return (
-                    <View key={index}>
-                      <Text
-                        style={{
-                          fontSize: 12,
-                          fontWeight: 600,
-                          color: "#686868",
-                        }}
-                      >
-                        {reaction}
-                      </Text>
-                    </View>
-                  );
-                })}
-              </>
+              <ReactionsDisplay reactions={postData.data.reactions} />
             )}
           </View>
         </View>
         {!postData.owned && (
           <View>
-            <TouchableOpacity onPress={(e) => handleLongPress(e)}>
+            <TouchableOpacity onPress={(e) => handleLongPress(e, true)}>
               <ReactionSVG />
             </TouchableOpacity>
           </View>

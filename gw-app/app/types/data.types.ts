@@ -74,6 +74,7 @@ export interface SelectedItem {
   parentGoalId?: string;
   parentGoal?: Goal;
   origin: "sharedGoals" | "othersGoals" | "goalWall";
+  reactionButton?: boolean;
 }
 
 export interface Notification {

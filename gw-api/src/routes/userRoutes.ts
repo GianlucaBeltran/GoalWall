@@ -34,11 +34,7 @@ userRoutes.post("/", async (req, res) => {
     userFromRequest.firstName,
     userFromRequest.lastName
   );
-  console.log(
-    user.getName() + " " + user.getLastName()
-      ? "User already exists"
-      : "New user"
-  );
+  console.log(user ? "User already exists" : "New user");
 
   if (user) {
     const goalsJson = await readFile<Record<string, IGoal>>(goalFilePath);
@@ -82,6 +78,14 @@ userRoutes.post("/", async (req, res) => {
   res.send({ user: newUser });
 });
 
+userRoutes.get("/background/:fileName", (req, res) => {
+  const fileName = req.params.fileName;
+
+  console.log("Sending background to app");
+
+  res.sendFile(path.resolve("src/assets/images/background/" + fileName));
+});
+
 userRoutes.get("/avatar/:fileName", (req, res) => {
   const fileName = req.params.fileName;
 
@@ -90,16 +94,22 @@ userRoutes.get("/avatar/:fileName", (req, res) => {
   res.sendFile(path.resolve("src/assets/images/" + fileName));
 });
 
-userRoutes.get("/avatars", (req, res) => {
-  const files = fs.readdirSync(path.resolve("src/assets/images"));
-  files.sort(
+userRoutes.get("/avatars", async (req, res) => {
+  const userJson = await readFile<Record<string, IUser>>(usersFilePath);
+  const usersObject = new Users(userJson);
+
+  const usedAvatars = usersObject.getUsedAvatars();
+
+  const files = fs.readdirSync(path.resolve("src/assets/images/avatars"));
+  const filteredFiles = files.filter((file) => !usedAvatars.has(file));
+  filteredFiles.sort(
     (a, b) =>
       Number(a.split(".")[0].split("avatar")[1]) -
       Number(b.split(".")[0].split("avatar")[1])
   );
 
-  console.log("Sending avatars to app", files.length);
-  res.send({ images: files });
+  console.log("Sending avatars to app", filteredFiles.length);
+  res.send({ images: filteredFiles });
 });
 
 userRoutes.get("/:id", async (req, res) => {

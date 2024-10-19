@@ -637,4 +637,10 @@ export class Users {
   addUser(user: User): void {
     this.users[user.getUid()] = user;
   }
+
+  getUsedAvatars(): Set<string> {
+    return new Set(
+      Object.values(this.users).map((user) => user.getAvatarFileName())
+    );
+  }
 }

@@ -4,13 +4,8 @@ import OthersSVG from "@/components/svg/OthersSVG";
 import ShareSVG from "@/components/svg/ShareSVG";
 import WriteSVG from "@/components/svg/WriteSVG";
 import { useContext, useEffect, useState } from "react";
-import {
-  ImageBackground,
-  Text,
-  StyleSheet,
-  View,
-  TouchableOpacity,
-} from "react-native";
+import { Text, StyleSheet, View, TouchableOpacity } from "react-native";
+import { ImageBackground } from "expo-image";
 import { AppContext } from "./context/appContext";
 import ChevronRightSVG from "@/components/svg/ChevronRightSVG";
 import { router } from "expo-router";
@@ -44,7 +39,7 @@ export default function mainMenu() {
       }
     >
       <ImageBackground
-        source={require("../assets/images/background.png")}
+        source={appData?.api + "/user/background/" + "background.png"}
         style={{
           borderRadius: 20,
           overflow: "hidden",

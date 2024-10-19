@@ -11,60 +11,24 @@ import { Goal } from "./types/data.types";
 import { motion, useAnimationFrame } from "framer-motion";
 
 import "./App.css";
-import { urlHome } from "./constants/apiEndpoints";
-
-const categories: Record<string, { id: string; name: string; color: string }> =
-  {
-    "+ Create a category": {
-      id: "0",
-      name: "+ Create a category",
-      color: "red",
-    },
-    Wellness: {
-      id: "1",
-      name: "Wellness",
-      color: "white",
-    },
-    Strength: {
-      id: "2",
-      name: "Strength",
-      color: "#FF8C96",
-    },
-    Flexibility: {
-      id: "3",
-      name: "Flexibility",
-      color: "#BAF3FF",
-    },
-    "Mental health": {
-      id: "4",
-      name: "Mental health",
-      color: "#FFE681",
-    },
-
-    Motivation: {
-      id: "5",
-      name: "Motivation",
-      color: "#FFC7E0",
-    },
-    Recovery: {
-      id: "6",
-      name: "Recovery",
-      color: "#C3FF8B",
-    },
-  };
+import { url } from "./constants/apiEndpoints";
+import { categories } from "./constants/categories";
 
 function GoalItem({
   goal,
   goalIndex,
   setFinishedGoal,
   setCanPushNew,
+  baseSpeed = 15,
 }: {
   goal: Goal;
   goalIndex: number;
   setFinishedGoal: Dispatch<React.SetStateAction<boolean>>;
   setCanPushNew: Dispatch<React.SetStateAction<boolean>>;
+  baseSpeed?: number;
 }) {
   const [goalWidth, setGoalWidth] = useState<number | undefined>();
+  const [goalHeight, setGoalHeight] = useState<number | undefined>();
   const [pushed, setPushed] = useState(false);
 
   const goalRef = useRef<HTMLDivElement | null>(null);
@@ -86,6 +50,7 @@ function GoalItem({
   useLayoutEffect(() => {
     if (goalRef.current) {
       const goalInfo = goalRef.current.getBoundingClientRect();
+      setGoalHeight(goalInfo.height);
       setGoalWidth(goalInfo.width);
     }
   }, [goalRef.current]);
@@ -97,6 +62,11 @@ function GoalItem({
       ? categories[goal.categories[0].name].color
       : "#81ffd1";
 
+  const reactionsSet = new Set(goal.reactions.map((reaction) => reaction.type));
+  const sortedReactions = Array.from(reactionsSet).sort().reverse();
+
+  const animationDuration = baseSpeed + (goalWidth! / 100 || 0);
+
   return (
     <motion.div
       ref={goalRef}
@@ -106,7 +76,7 @@ function GoalItem({
         x: [window.innerWidth + 10, -(goalWidth || 0) - 10],
       }}
       transition={{
-        duration: 15,
+        duration: animationDuration,
         ease: "linear",
       }}
       onAnimationComplete={() => {
@@ -116,16 +86,23 @@ function GoalItem({
         background: `${goalColor}`,
         boxShadow: `0px 0px 4px 0px ${goalColor}, 0px 0px 15px 0px ${goalColor}`,
       }}
-      // style={{ top: Math.random() * 10 }}
     >
+      <img src={url + "/user/avatar/" + goal.avatarFileName} />
       <p className="goal-title">{goal.description}</p>
-      <div className="bottom-part">
-        <img src={urlHome + "/user/avatar/" + goal.avatarFileName} />
-        <div className="reactions">
-          {goal.reactions.map((reaction, index) => (
-            <p key={index}>{reaction.type}</p>
-          ))}
-        </div>
+      <div className="reactions" style={{ top: -((goalHeight || 100) / 2) }}>
+        {sortedReactions.map((reaction, index) => (
+          <p
+            key={index}
+            className="reaction"
+            style={{
+              right: index * 35,
+              zIndex: sortedReactions.length - index,
+            }}
+          >
+            {reaction}
+          </p>
+        ))}
+        {/* <p style={{ top: 20, position: "absolute" }}>{animationDuration}</p> */}
       </div>
     </motion.div>
   );
@@ -134,9 +111,11 @@ function GoalItem({
 function GoalPathContainer({
   goals,
   pathIndex,
+  baseSpeed = 15,
 }: {
   goals: Goal[];
   pathIndex: number;
+  baseSpeed?: number;
 }) {
   const [animatingGoals, setAnimatingGoals] = useState<Goal[]>([]);
   const [finishedGoal, setFinishedGoal] = useState<boolean>(false);
@@ -187,6 +166,7 @@ function GoalPathContainer({
             setFinishedGoal={setFinishedGoal}
             setCanPushNew={setCanPushNew}
             goalIndex={index}
+            baseSpeed={baseSpeed}
           />
         ))}
     </div>
@@ -196,6 +176,7 @@ function GoalPathContainer({
 function App() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [baseSpeed, setBaseSpeed] = useState(15);
 
   const divContainerRef = createRef<HTMLDivElement>();
 
@@ -237,8 +218,41 @@ function App() {
           setIsFullScreen(false);
         }
       }
+      if (ev.key === "s") {
+        setGoals([...shuffle(goals)]);
+      }
+      if (ev.key === "=") {
+        setBaseSpeed(baseSpeed - 1);
+        console.log(baseSpeed);
+      }
+      if (ev.key === "-") {
+        setBaseSpeed(baseSpeed + 1);
+        console.log(baseSpeed);
+      }
     });
-  });
+
+    return () => {
+      window.removeEventListener("keydown", () => {});
+    };
+  }, [isFullScreen, divContainerRef.current, goals, baseSpeed]);
+
+  function shuffle(array: Goal[]) {
+    let currentIndex = array.length;
+
+    // While there remain elements to shuffle...
+    while (currentIndex != 0) {
+      // Pick a remaining element...
+      let randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+
+      // And swap it with the current element.
+      [array[currentIndex], array[randomIndex]] = [
+        array[randomIndex],
+        array[currentIndex],
+      ];
+    }
+    return array;
+  }
 
   const numberOfPaths = goals.length < 5 ? goals.length : 5;
   const goalsPerPath = goals.length / numberOfPaths;
@@ -254,7 +268,12 @@ function App() {
         {goals.length && (
           <>
             {paths.map((path, index) => (
-              <GoalPathContainer key={index} goals={path} pathIndex={index} />
+              <GoalPathContainer
+                key={index}
+                goals={path}
+                pathIndex={index}
+                baseSpeed={baseSpeed}
+              />
             ))}
           </>
         )}

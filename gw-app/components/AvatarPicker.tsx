@@ -4,16 +4,16 @@ import {
   AppContext,
   AppDispatchContext,
 } from "@/app/context/appContext";
-import { router } from "expo-router";
 import { Dispatch, useContext, useEffect, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
   TouchableOpacity,
-  Image,
   Dimensions,
   FlatList,
 } from "react-native";
+
+import { Image } from "expo-image";
 
 export function AvatarButton({
   dispatch,
@@ -27,6 +27,9 @@ export function AvatarButton({
   handleAvatarSelection: (avatar: string) => void;
 }) {
   const appData = useContext(AppContext);
+  const blurhash =
+    "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
+
   return (
     <TouchableOpacity
       activeOpacity={appData?.user?.avatarFileName === avatar ? 1 : 0.6}
@@ -36,7 +39,8 @@ export function AvatarButton({
       disabled={appDataAvatar === avatar}
     >
       <Image
-        source={{ uri: appData?.api + "/user/avatar/" + avatar }}
+        source={appData?.api + "/user/avatar/" + avatar}
+        placeholder={{ blurhash }}
         style={{
           width: 75,
           height: 75,
@@ -75,6 +79,7 @@ function AvatarGrid({
       style={{
         alignItems: "center",
         // justifyContent: "center",
+        gap: 10,
         paddingRight: 30,
         paddingLeft: 30,
       }}
@@ -133,7 +138,6 @@ export default function AvatarPicker({
 }) {
   const [avatars, setAvatars] = useState<string[]>([]);
   const [scrollIndex, setScrollIndex] = useState(0);
-  const [pickerWidth, setPickerWidth] = useState(0);
 
   const appData = useContext(AppContext);
   const dispatch = useContext(AppDispatchContext);
@@ -142,7 +146,6 @@ export default function AvatarPicker({
 
   useEffect(() => {
     if (!appData?.api) return;
-    // if (avatars.length) return;
     (async () => {
       try {
         const response = await fetch(appData?.api + "/user/avatars");
@@ -154,7 +157,7 @@ export default function AvatarPicker({
         console.error(error.message);
       }
     })();
-  }, [scrollIndex]);
+  }, [appData?.api]);
 
   const avatarsScrollView = avatars.reduce((acc, avatar, index) => {
     if (index % 7 === 0) {
@@ -220,15 +223,19 @@ export default function AvatarPicker({
         )}
       />
       <View style={styles.slideButtons}>
-        {Array.from({ length: 5 }).map((_, index) => (
-          <View
-            key={index}
-            style={[
-              styles.slideButton,
-              { backgroundColor: index === scrollIndex ? "black" : "#AEAEAE" },
-            ]}
-          />
-        ))}
+        {Array.from({ length: Math.ceil(avatars.length / 7) }).map(
+          (_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.slideButton,
+                {
+                  backgroundColor: index === scrollIndex ? "black" : "#AEAEAE",
+                },
+              ]}
+            />
+          )
+        )}
       </View>
     </View>
   );

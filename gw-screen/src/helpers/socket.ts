@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
-import { urlHome } from "../constants/apiEndpoints";
+import { url } from "../constants/apiEndpoints";
 
-export const socket = io(urlHome, {
+export const socket = io(url, {
   auth: {
     userId: "goalWallScreen",
   },

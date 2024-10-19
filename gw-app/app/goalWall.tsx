@@ -3,12 +3,12 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ImageBackground,
   Dimensions,
   LayoutChangeEvent,
   GestureResponderEvent,
 } from "react-native";
 import * as ScreenOrientation from "expo-screen-orientation";
+import { ImageBackground } from "expo-image";
 import {
   Dispatch,
   useContext,
@@ -339,7 +339,7 @@ export default function GoalWall() {
 
   return (
     <ImageBackground
-      source={require("../assets/images/backgroundImageRotated.png")}
+      source={appData?.api + "/user/background/" + "backgroundImageRotated.png"}
       style={styles.imageBackground}
     >
       {/* {screenWidth && ( */}

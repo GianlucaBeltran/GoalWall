@@ -5,7 +5,7 @@ import GoalSVG from "@/components/svg/GoalSVG";
 import MembermshipSVG from "@/components/svg/MembershipSVG";
 import { useNavigation } from "expo-router";
 import { useContext, useEffect } from "react";
-import { ImageBackground } from "react-native";
+import { ImageBackground } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppContext } from "./context/appContext";
 
@@ -20,8 +20,8 @@ export default function Home() {
 
   return (
     <ImageBackground
-      source={require("../assets/images/background.png")}
-      resizeMode="cover"
+      source={appData?.api + "/user/background/" + "background.png"}
+      contentFit="cover"
       style={{ flex: 1, justifyContent: "center" }}
     >
       <SafeAreaView edges={["top"]}>

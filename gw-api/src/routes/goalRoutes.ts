@@ -109,14 +109,13 @@ goalRoutes.post("/", async (req, res) => {
     goalsObject.addGoal(goalObject);
     userFromData.addGoal(goalObject.getGoalId());
     await writeData(usersFilePath, usersObject.users);
-
-    io.to("goalWallScreen").emit(
-      "goals",
-      goalsObject.getGoalsArrayWithAvatar(usersObject)
-    );
   }
 
   await writeData(goalFilePath, goalsObject.getGoals());
+  io.to("goalWallScreen").emit(
+    "goals",
+    goalsObject.getGoalsArrayWithAvatar(usersObject)
+  );
 
   userFromData.setGoalsObjects(
     goalsObject.findGoalsByAuthorId(userFromData.getUid())
@@ -189,6 +188,11 @@ goalRoutes.delete("/", async (req, res) => {
 
   await writeData(goalFilePath, goalsObject.getGoals());
   await writeData(usersFilePath, usersObject.users);
+
+  io.to("goalWallScreen").emit(
+    "goals",
+    goalsObject.getGoalsArrayWithAvatar(usersObject)
+  );
 
   userFromData.setGoalsObjects(
     goalsObject.findGoalsByAuthorId(userFromData.getUid())

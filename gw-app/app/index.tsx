@@ -12,9 +12,9 @@ import {
   Keyboard,
   Button,
   TouchableOpacity,
-  ImageBackground,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ImageBackground } from "expo-image";
 import AnimatedView, {
   useSharedValue,
   withSpring,
@@ -118,8 +118,8 @@ export default function Home() {
 
   return (
     <ImageBackground
-      source={require("../assets/images/background.png")}
-      resizeMode="cover"
+      source={appData?.api + "/user/background/background.png"}
+      contentFit="cover"
       style={styles.image}
     >
       <TouchableWithoutFeedback

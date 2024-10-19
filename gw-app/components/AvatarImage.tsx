@@ -1,6 +1,7 @@
 import { AppContext } from "@/app/context/appContext";
 import { useContext } from "react";
-import { View, Image, ImageSourcePropType } from "react-native";
+import { View, ImageSourcePropType } from "react-native";
+import { Image } from "expo-image";
 
 export default function AvatarImage({
   avatarImage,

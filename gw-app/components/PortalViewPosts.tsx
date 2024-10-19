@@ -37,6 +37,7 @@ import {
   AppDispatchContext,
   ChatData,
 } from "@/app/context/appContext";
+import ReactionsDisplay from "./ReactionsDisplay";
 
 const reactionOptions: { id: string; icon: "❤️" | "👏" | "💪" | "🔥" }[] = [
   {
@@ -182,8 +183,6 @@ export default function PortalViewPost({
       (r) => r.authorId === appData.user?.uid && r.type === reactionType
     );
 
-    console.log("Reaction", appData.user?.reactions, reaction);
-
     const newReaction: Reaction = {
       reactionId: reaction ? reaction.reactionId : "",
       authorId: reaction ? reaction.authorId : appData.user?.uid!,
@@ -241,20 +240,6 @@ export default function PortalViewPost({
     );
   };
 
-  const handleDirectMessage = async () => {
-    if (!dispatch || !appData) return;
-
-    console.log("handle directMessage");
-
-    // dispatch({
-    //   type: AppActionType.SET_CURRENT_CHAT,
-    //   payload: data.chat,
-    // });
-
-    setSelectedItem(null);
-    router.navigate("/chat");
-  };
-
   useEffect(() => {
     if (!appData || !dispatch || !selectedItem) return;
     (async () => {
@@ -287,7 +272,7 @@ export default function PortalViewPost({
 
   return (
     <>
-      {selectedItem && (
+      {selectedItem && !selectedItem.reactionButton && (
         <Portal>
           <BlurView style={styles.container} intensity={60}>
             <TouchableOpacity
@@ -353,7 +338,6 @@ export default function PortalViewPost({
                         }}
                         onPress={() => {
                           handleReaction(reaction.icon);
-                          console.log("Reaction", reaction.icon);
                         }}
                       >
                         <Text style={{ fontSize: 24 }}>{reaction.icon}</Text>
@@ -490,23 +474,9 @@ export default function PortalViewPost({
                       </Text>
                       {selectedItem.item.reactions && (
                         <>
-                          {Array.from(postReactions).map(
-                            (reaction: string, index) => {
-                              return (
-                                <View key={index}>
-                                  <Text
-                                    style={{
-                                      fontSize: 12,
-                                      fontWeight: 600,
-                                      color: "#686868",
-                                    }}
-                                  >
-                                    {reaction}
-                                  </Text>
-                                </View>
-                              );
-                            }
-                          )}
+                          <ReactionsDisplay
+                            reactions={selectedItem.item.reactions}
+                          />
                         </>
                       )}
                     </View>
@@ -515,6 +485,65 @@ export default function PortalViewPost({
               </TouchableOpacity>
             </TouchableOpacity>
           </BlurView>
+        </Portal>
+      )}
+      {selectedItem && selectedItem.reactionButton && (
+        <Portal>
+          <View style={styles.container}>
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => setSelectedItem(null)}
+              style={[
+                styles.container,
+                {
+                  justifyContent: "flex-start",
+                  alignItems: "flex-start",
+                },
+              ]}
+            >
+              <View
+                onLayout={onLayoutReaction}
+                style={{
+                  position: "absolute",
+                  backgroundColor: "white",
+                  top: itemCoordinates.y - reactionDimensions.height,
+                  right: 10,
+                  width: 200,
+                  padding: 10,
+                  borderRadius: 25,
+                  flexDirection: "row",
+                  justifyContent: "space-evenly",
+                  shadowColor: "rgba(0, 0, 0, 0.10)",
+                  shadowOffset: {
+                    width: 0,
+                    height: 2,
+                  },
+                  shadowOpacity: 1,
+                  shadowRadius: 3.84,
+                  elevation: 5,
+                }}
+              >
+                {reactionOptions.map((reaction) => (
+                  <TouchableOpacity
+                    key={reaction.id}
+                    style={{
+                      backgroundColor: checkIfReactionIsUsers(reaction.icon)
+                        ? "#00A2FF"
+                        : "white",
+                      padding: 5,
+                      borderRadius: 33,
+                    }}
+                    onPress={() => {
+                      handleReaction(reaction.icon);
+                      console.log("Reaction", reaction.icon);
+                    }}
+                  >
+                    <Text style={{ fontSize: 24 }}>{reaction.icon}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </TouchableOpacity>
+          </View>
         </Portal>
       )}
     </>

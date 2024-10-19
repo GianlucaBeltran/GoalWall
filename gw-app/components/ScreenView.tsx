@@ -1,6 +1,5 @@
 import { useNavigation } from "expo-router";
 import {
-  ImageBackground,
   Text,
   StyleSheet,
   View,
@@ -9,8 +8,11 @@ import {
   Keyboard,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ImageBackground } from "expo-image";
 
 import ChevronLeftSVG from "@/components/svg/ChevronLeftSVG";
+import { AppContext } from "@/app/context/appContext";
+import { useContext } from "react";
 
 export default function ScreenView({
   title,
@@ -26,10 +28,11 @@ export default function ScreenView({
   edges?: ("top" | "right" | "bottom" | "left")[];
 }) {
   const navigation = useNavigation();
+  const appData = useContext(AppContext);
 
   return (
     <ImageBackground
-      source={require("../assets/images/background.png")}
+      source={appData?.api + "/user/background/" + "background.png"}
       style={{ flex: 1 }}
     >
       <SafeAreaView style={{ flex: 1 }} edges={edges}>

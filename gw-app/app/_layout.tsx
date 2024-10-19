@@ -12,7 +12,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { Stack, usePathname } from "expo-router";
 import { User, Goal, Comment, Chat } from "./types/data.types";
 import { ImageSourcePropType } from "react-native";
-import { urlHome, urlNgrok, urlSchool } from "./constants/apiEndpoints";
+import { url } from "./constants/apiEndpoints";
 import NetInfo from "@react-native-community/netinfo";
 import * as Location from "expo-location";
 import { Avatar } from "./types/avatar.types";
@@ -44,7 +44,7 @@ export default function RootLayout() {
   const [appData, dispatch] = useReducer(appDataReducer, {
     user: null,
     editingData: null,
-    api: urlHome,
+    api: url,
     isLoading: false,
     sharedGoals: [],
     myGoals: [],
