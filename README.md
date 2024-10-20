@@ -53,7 +53,7 @@ This is a mono-repo which means all the code of our prototype is stored in this 
 
 The api is what connects all the different apps and gives them the information they need.
 
-Since this is a prototype there is no database and no user authentication, all the information is being written into five json files stored in the data directory.
+Since this is a prototype there is no database and no user authentication, all the information is being written into four json files stored in the data directory.
 Due to do this, 5 classes were made to try and keep the information handling cleaner.
 
  - Users
