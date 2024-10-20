@@ -12,21 +12,18 @@ Before running, ensure that [Node.js is installed](https://nodejs.org/en/downloa
 2. Clone the repository in whichever folder you choose: `git clone https://github.com/GianlucaBeltran/GoalWall.git` using https or `git@github.com:GianlucaBeltran/GoalWall.git` using ssh.
 3. Once cloned, cd into the Goal Wall directory: `cd GoalWall`
 
+> **_NOTE:_** Open a new terminal or terminal tab after running each project
+
 ### Running the api (gw-api)
-1. cd into gw-api: `cd gw-api`
-2. Run: `npm install` to download all the node packages
-3. Run: `npm run dev` this will start the api server, the terminal should output `Express is listening at http://localhost:3000`
+1. Run: `bash ./apiRunCommand.sh` to start the api
 > **_IMPORTANT:_** Do not close the terminal tab, it will shut down the server, the server needs to be up for the app and the goal screen to fetch all the information they need
 
 ### Running the app (gw-app)
 > **_NOTE:_** The app was developed mainly for iphone, very little to no testing was done on android devices
-1. Install [Expo go](https://expo.dev/go) in your mobile device
+1. Install [Expo go](https://expo.dev/go) on your mobile device
 2. Create an account in Expo go
-3. cd into gw-app: `cd gw-app`
-4. Run: `npm install` to download all the node packages
-5. Run: `npx expo start --no-dev --minify` (`--no-dev` and `--minify` flags are not needed but they ensure a better experience for the user using the app)
-6. TODOOOOOOOOOOO
-7. The terminal should have printed a QR code, scan it with your phone camera, expo go should open and load the app
+3. Run: `bash ./appRunCommand.sh` to start the app
+4. The terminal should have printed a QR code, scan it with your phone camera, expo go should open and load the app
 > **_NOTE:_** If the app crashes for some reason, or a red error message is displayed, you can press r in the terminal running expo go, to reload the app
 
 ### Running the screen (gw-screen)
