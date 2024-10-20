@@ -28,10 +28,8 @@ Before running, ensure that [Node.js is installed](https://nodejs.org/en/downloa
 
 ### Running the screen (gw-screen)
 > **_NOTE:_** The screen was developed using chrome. No testing has been done in other browsers. This shouldn't be an issue, but it is good to keep in mind.
-1. cd into gw-screen: `cd gw-screen`
-2. Run: `npm install`
-3. Run: `npm start`
-4. A browser tab should open and the goals should start animating on screen
+1. Run: `bash ./screenRunCommand.sh`
+2. A browser tab should open and the goals should start animating on screen
 > **_EASTER EGGS:_** There is some interaction to be had with the screen, although it's main purpose is to just visualize the goals. Check the Screen section for more information.
 
 ## Main frameworks used
