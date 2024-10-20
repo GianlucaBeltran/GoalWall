@@ -1,5 +1,5 @@
 import express from "express";
-import { DirectMessage } from "./models/api.types";
+import { DirectMessage } from "./models/directMessage";
 import { readFile } from "./models/readData";
 import { writeData } from "./models/insertData";
 import {
@@ -14,7 +14,9 @@ import goalRoutes from "./routes/goalRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import reactionRoutes from "./routes/reactionRoutes";
 import messageRoutes from "./routes/messageRoutes";
-import { Chat, Chats, Goals, IChat, IGoal, IUser, Users } from "./models/user";
+import { IUser, Users } from "./models/users";
+import { Goals, IGoal } from "./models/goals";
+import { Chat, Chats, IChat } from "./models/chats";
 
 const app = express();
 app.use(express.json());

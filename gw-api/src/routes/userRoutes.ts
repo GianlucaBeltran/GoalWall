@@ -8,17 +8,11 @@ import {
   goalFilePath,
   usersFilePath,
 } from "../constants/filePaths";
-// import { User } from "../models/api.types";
-import {
-  Comments,
-  Goals,
-  IComment,
-  IGoal,
-  IUser,
-  User,
-  Users,
-} from "../models/user";
+
 import { writeData } from "../models/insertData";
+import { IUser, User, Users } from "../models/users";
+import { Goals, IGoal } from "../models/goals";
+import { Comments, IComment } from "../models/comments";
 
 const userRoutes = express.Router();
 
@@ -91,7 +85,7 @@ userRoutes.get("/avatar/:fileName", (req, res) => {
 
   console.log("Sending avatar to app");
 
-  res.sendFile(path.resolve("src/assets/images/" + fileName));
+  res.sendFile(path.resolve("src/assets/images/avatars/" + fileName));
 });
 
 userRoutes.get("/avatars", async (req, res) => {

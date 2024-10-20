@@ -1,9 +1,10 @@
 import express from "express";
 import { v4 as uuidv4 } from "uuid";
 import { chatFilePath, usersFilePath } from "../constants/filePaths";
-import { Chat, ChatData, Chats, IChat, IUser, Users } from "../models/user";
 import { readFile } from "../models/readData";
 import { writeData } from "../models/insertData";
+import { IUser, Users } from "../models/users";
+import { Chat, ChatData, Chats, IChat } from "../models/chats";
 
 const messageRoutes = express.Router();
 

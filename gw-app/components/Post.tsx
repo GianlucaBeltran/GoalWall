@@ -119,7 +119,7 @@ export default function Post({
         console.log(error, "error");
       }
     })();
-  }, []);
+  }, [appData]);
 
   const postReactions = new Set(postData.data.reactions?.map((r) => r.type));
 

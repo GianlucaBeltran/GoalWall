@@ -1,25 +1,18 @@
 import express from "express";
 import { v4 as uuidv4 } from "uuid";
-import { findUser, readFile } from "../models/readData";
+import { readFile } from "../models/readData";
 import {
   commentFilePath,
   goalFilePath,
   usersFilePath,
 } from "../constants/filePaths";
 // import { User } from "../models/api.types";
-import {
-  Comments,
-  Goals,
-  IComment,
-  IGoal,
-  IReaction,
-  IUser,
-  Reaction,
-  User,
-  Users,
-} from "../models/user";
 import { writeData } from "../models/insertData";
 import { io } from "..";
+import { IReaction } from "../models/reaction";
+import { IUser, Users } from "../models/users";
+import { Goals, IGoal } from "../models/goals";
+import { Comments, IComment } from "../models/comments";
 
 const reactionRoutes = express.Router();
 

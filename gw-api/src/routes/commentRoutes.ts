@@ -6,17 +6,10 @@ import {
   goalFilePath,
   usersFilePath,
 } from "../constants/filePaths";
-import {
-  Goals,
-  IGoal,
-  IUser,
-  User,
-  Users,
-  IComment,
-  Comment,
-  Comments,
-} from "../models/user";
 import { writeData } from "../models/insertData";
+import { Comments, Comment, IComment } from "../models/comments";
+import { IUser, Users } from "../models/users";
+import { Goals, IGoal } from "../models/goals";
 
 const commentRoutes = express.Router();
 
@@ -101,26 +94,6 @@ commentRoutes.post("/", async (req, res) => {
   });
   console.log("Comment added");
 });
-
-// commentRoutes.get("/:id", async (req, res) => {
-//   const userIdFromRequest: string = req.params.id;
-//   console.log("Recieved user id ", userIdFromRequest, " from app");
-
-//   const userJson = await readFile<Record<string, IUser>>(usersFilePath);
-
-//   const usersObject = new Users(userJson);
-
-//   const user = usersObject.findUserByUid(userIdFromRequest);
-//   console.log(user ? "User found" : "User not found");
-
-//   if (user) {
-//     res.send({ user });
-//   } else {
-//     res.send({
-//       message: "User not found",
-//     });
-//   }
-// });
 
 commentRoutes.get("/:userId/:goalId", async (req, res) => {
   const userId: string = req.params.userId;

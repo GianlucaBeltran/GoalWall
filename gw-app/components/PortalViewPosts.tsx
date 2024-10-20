@@ -228,10 +228,6 @@ export default function PortalViewPost({
     }
   };
 
-  const postReactions = new Set(
-    selectedItem?.item.reactions?.map((r) => r.type)
-  );
-
   const checkIfReactionIsUsers = (reactionType: "❤️" | "👏" | "💪" | "🔥") => {
     if (!appData) return false;
 

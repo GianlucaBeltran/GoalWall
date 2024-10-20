@@ -5,28 +5,21 @@ import {
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer } from "react";
 import "react-native-reanimated";
-
+import * as Network from "expo-network";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Stack, usePathname } from "expo-router";
-import { User, Goal, Comment, Chat } from "./types/data.types";
-import { ImageSourcePropType } from "react-native";
+import { Chat } from "./types/data.types";
 import { url } from "./constants/apiEndpoints";
-import NetInfo from "@react-native-community/netinfo";
-import * as Location from "expo-location";
-import { Avatar } from "./types/avatar.types";
 import {
   AppActionType,
   AppContext,
   appDataReducer,
   AppDispatchContext,
-  ChatData,
 } from "./context/appContext";
-import sharedGoals from "./othersGoals";
 import { Host } from "react-native-portalize";
 import PortalViewNotifications from "@/components/PortalViewNotifications";
-import { Socket } from "socket.io-client";
 import { connectSocket } from "./helpers/socket";
 import { constructMessageDispatch } from "./helpers/chatHelpers";
 
@@ -44,7 +37,7 @@ export default function RootLayout() {
   const [appData, dispatch] = useReducer(appDataReducer, {
     user: null,
     editingData: null,
-    api: url,
+    api: url + ":3000" || "",
     isLoading: false,
     sharedGoals: [],
     myGoals: [],
@@ -59,6 +52,13 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  useEffect(() => {
+    (async () => {
+      const network = await Network.getIpAddressAsync();
+      console.log(network, "network");
+    })();
+  }, []);
 
   useEffect(() => {
     if (!appData?.user || !dispatch || appData.socket?.connected) return;

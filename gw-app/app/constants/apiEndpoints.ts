@@ -2,10 +2,15 @@ import { Dispatch } from "react";
 import { AppAction, AppActionType } from "../context/appContext";
 import { User } from "../types/data.types";
 
-const urlSchool = "http://130.229.135.156:3000";
-const urlHome = "http://192.168.0.198:3000";
-const urlNgrok = "https://quick-assured-macaque.ngrok-free.app";
+const urlSchool = "http://130.229.135.156"; // gianluca personal ip when connected to KTH VPN
+const urlNgrok = "https://quick-assured-macaque.ngrok-free.app"; // gianluca ngrok, only works when ngrok is running
 
+// This needs to be the ip of the computer that ran the npx expo start command
+const urlHome = "http://192.168.0.198"; // <--- change this to your local ip address, 
+// it is displayed right after the QR code when you run the app: 
+// Metro waiting on exp://192.168.0.198:8081 DO NOT USE THE PORT NUMBER (:8081) and change exp:// to http://
+// Change to:      http://^^^^^^^^^^^^^
+// you can also find it by running `ifconfig` on mac
 export const url = urlHome;
 
 export async function fetchUser({
