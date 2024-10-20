@@ -16,6 +16,7 @@ Before running, ensure that [Node.js is installed](https://nodejs.org/en/downloa
 
 ### Running the api (gw-api)
 1. Run: `bash ./apiRunCommand.sh` to start the api
+2. The terminal should have printed: `Express is listening at http://localhost:3000`
 > **_IMPORTANT:_** Do not close the terminal tab, it will shut down the server, the server needs to be up for the app and the goal screen to fetch all the information they need
 
 ### Running the app (gw-app)
