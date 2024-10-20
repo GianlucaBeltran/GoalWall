@@ -24,6 +24,7 @@ import { AppContext } from "./context/appContext";
 import AvatarImage from "@/components/AvatarImage";
 import { formatedDate } from "./helpers/dateFormating";
 import Animated, {
+  cancelAnimation,
   Easing,
   measure,
   runOnJS,
@@ -38,6 +39,7 @@ import Animated, {
 import { Host } from "react-native-portalize";
 import PortalViewPost from "@/components/PortalViewPosts";
 import * as Haptics from "expo-haptics";
+import ReactionsDisplay from "@/components/ReactionsDisplay";
 
 const categories: Record<string, { id: string; name: string; color: string }> =
   {
@@ -79,25 +81,9 @@ const categories: Record<string, { id: string; name: string; color: string }> =
     },
   };
 
-function GoalItem({
-  goal,
-  goalIndex,
-  setFinishedGoal,
-  setCanPushNew,
-}: {
-  goal: Goal;
-  goalIndex: number;
-  setFinishedGoal: Dispatch<React.SetStateAction<boolean>>;
-  setCanPushNew: Dispatch<React.SetStateAction<boolean>>;
-}) {
+function GoalItem({ goal }: { goal: Goal }) {
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
   const [itemCoordinates, setItemCoordinates] = useState({ x: 0, y: 0 });
-  const [screenWidth, setScreenWidth] = useState<number | null>();
-
-  const goalPosition = useSharedValue(1000);
-
-  const [goalWidth, setGoalWidth] = useState<number | undefined>();
-  const [pushed, setPushed] = useState(false);
 
   const goalColor =
     goal.categories &&
@@ -124,40 +110,15 @@ function GoalItem({
     };
     setSelectedItem(selectedItem);
   };
-  // const offset = useSharedValue(0);
-
-  const animatedStyles = useAnimatedStyle(() => ({
-    transform: [{ translateX: goalPosition.value }],
-    position: "absolute",
-    justifyContent: "center",
-    flexDirection: "row",
-    alignItems: "center",
-  }));
-
-  const onLayout = (event: LayoutChangeEvent) => {
-    const { x, y, width, height } = event.nativeEvent.layout;
-    goalPosition.value = Dimensions.get("screen").width + 30;
-    setScreenWidth(Dimensions.get("screen").width);
-    setGoalWidth(width);
-  };
-
-  const postReactions = new Set(goal.reactions.map((r) => r.type));
-
-  useFrameCallback((frameInfo) => {
-    if (!goalWidth || !screenWidth) return;
-
-    if (goalPosition.value > -(goalWidth + screenWidth)) {
-      goalPosition.value -= 1;
-    }
-    if (pushed) return;
-    if (goalPosition.value < -goalWidth) {
-      runOnJS(setPushed)(true);
-      runOnJS(setCanPushNew)(true);
-    }
-  });
 
   return (
-    <Animated.View style={animatedStyles} key={goal.id} onLayout={onLayout}>
+    <View
+      style={{
+        justifyContent: "center",
+        flexDirection: "row",
+        alignItems: "center",
+      }}
+    >
       <TouchableOpacity
         activeOpacity={0.7}
         style={{
@@ -167,10 +128,8 @@ function GoalItem({
           gap: 10,
           backgroundColor: "white",
           borderRadius: 20,
-          maxWidth: 500,
         }}
         onLongPress={(e) => onLongPress(e)}
-        // disabled={!onLongPress}
       >
         <AvatarImage
           size={39}
@@ -198,85 +157,88 @@ function GoalItem({
             >
               {formatedDate(goal.createdAt)}
             </Text>
-            {Array.from(postReactions).map((reaction: string, index) => {
-              return (
-                <View key={index}>
-                  <Text
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: "#686868",
-                    }}
-                  >
-                    {reaction}
-                  </Text>
-                </View>
-              );
-            })}
+            <ReactionsDisplay reactions={goal.reactions} />
           </View>
         </View>
-        {/* {!postData.owned && (
-              <View>
-                <TouchableOpacity onPress={(e) => handleLongPress(e)}>
-                  <ReactionSVG />
-                </TouchableOpacity>
-              </View>
-            )} */}
       </TouchableOpacity>
       <PortalViewPost
         selectedItem={selectedItem}
         itemCoordinates={itemCoordinates}
         setSelectedItem={setSelectedItem}
       />
-    </Animated.View>
+    </View>
   );
 }
 
-function GoalPathContainer({ goals }: { goals: Goal[] }) {
-  const [animatingGoals, setAnimatingGoals] = useState<Goal[]>([]);
-  const [finishedGoal, setFinishedGoal] = useState<boolean>(false);
-  const [canPushNew, setCanPushNew] = useState(false);
-  const [currentIndex, setCurrenIndex] = useState(0);
+function GoalPathContainer({
+  goals,
+  screenWidth,
+}: {
+  goals: Goal[];
+  screenWidth: number;
+}) {
+  const [pathWidth, setPathWidth] = useState<number | undefined>();
+  const [paused, setPaused] = useState(false);
+
+  const goalStartPos = useSharedValue(100);
+
+  const animatedStyles = useAnimatedStyle(() => ({
+    transform: [{ translateX: goalStartPos.value }],
+    gap: 100,
+    flexDirection: "row",
+    alignItems: "center",
+  }));
+
+  const onLayout = (event: LayoutChangeEvent) => {
+    const { x, y, width, height } = event.nativeEvent.layout;
+    setPathWidth(width);
+  };
+
+  const startAnimation = () => {
+    if (!pathWidth) return;
+
+    goalStartPos.value = withRepeat(
+      withTiming(-pathWidth - screenWidth - 100 * goals.length - 10, {
+        duration: 40000 + goals.length / 100,
+        easing: Easing.linear,
+      }),
+      -1,
+      false
+    );
+  };
 
   useEffect(() => {
-    if (animatingGoals.length) return;
-    setAnimatingGoals(goals.slice(0, 1));
-    setCurrenIndex(1);
-  }, [goals, animatingGoals]);
-
-  useEffect(() => {
-    if (finishedGoal) {
-      setAnimatingGoals(animatingGoals.slice(1));
-      setFinishedGoal(false);
-    }
-  }, [finishedGoal]);
-
-  useEffect(() => {
-    if (goals.length < 2) return;
-    if (canPushNew) {
-      console.log("pushing", goals[currentIndex % goals.length].description);
-      setAnimatingGoals([
-        ...animatingGoals,
-        goals[currentIndex % goals.length],
-      ]);
-      setCanPushNew(false);
-      setCurrenIndex((currentIndex % goals.length) + 1);
-    }
-  }, [canPushNew]);
+    goalStartPos.value = screenWidth;
+    startAnimation();
+  }, [pathWidth]);
 
   return (
-    <View style={{ flex: 1, flexDirection: "row" }}>
-      {animatingGoals.length !== 0 &&
-        animatingGoals.map((goal, index) => (
-          <GoalItem
-            key={goal.id}
-            goal={goal}
-            setFinishedGoal={setFinishedGoal}
-            setCanPushNew={setCanPushNew}
-            goalIndex={index}
-          />
-        ))}
-    </View>
+    <Animated.View
+      style={[animatedStyles, { flex: 1, flexDirection: "row" }]}
+      onLayout={onLayout}
+    >
+      <TouchableOpacity
+        activeOpacity={1}
+        onPress={() => {
+          if (paused) {
+            startAnimation();
+            setPaused(false);
+          } else {
+            cancelAnimation(goalStartPos);
+            setPaused(true);
+          }
+        }}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 100,
+          flex: 1,
+        }}
+      >
+        {goals.length !== 0 &&
+          goals.map((goal, index) => <GoalItem key={goal.id} goal={goal} />)}
+      </TouchableOpacity>
+    </Animated.View>
   );
 }
 
@@ -293,21 +255,12 @@ export default function GoalWall() {
   }
 
   useEffect(() => {
-    Dimensions.addEventListener("change", () => {
-      ScreenOrientation.getOrientationAsync().then((value) => {
-        if (value === ScreenOrientation.Orientation.LANDSCAPE_RIGHT) {
-          setScreenWidth(Dimensions.get("screen").width);
-        }
-      });
-    });
-  }, []);
-
-  useEffect(() => {
     (async () => {
-      await changeScreenOrientation(
+      changeScreenOrientation(
         ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT
+      ).then(() =>
+        setTimeout(() => setScreenWidth(Dimensions.get("screen").width), 1000)
       );
-
       console.log("fetching goals");
 
       try {
@@ -335,12 +288,13 @@ export default function GoalWall() {
     return goals.slice(i * goalsPerPath, (i + 1) * goalsPerPath);
   });
 
+  console.log(goals.length, "goals", paths.length, "paths", goalsPerPath);
+
   return (
     <ImageBackground
       source={appData?.api + "/user/background/" + "backgroundImageRotated.png"}
       style={styles.imageBackground}
     >
-      {/* {screenWidth && ( */}
       <Host>
         <View style={styles.container}>
           <View style={{ margin: 20, marginLeft: 60, marginBottom: 5 }}>
@@ -348,14 +302,22 @@ export default function GoalWall() {
               <ChevronLeftSVG />
             </TouchableOpacity>
           </View>
-          {goals.length !== 0 && (
-            <View style={styles.goalsContainer}>
-              <>
-                {paths.map((path, index) => (
-                  <GoalPathContainer key={index} goals={path} />
-                ))}
-              </>
-            </View>
+          {screenWidth && (
+            <>
+              {goals.length !== 0 && (
+                <View style={styles.goalsContainer}>
+                  <>
+                    {paths.map((path, index) => (
+                      <GoalPathContainer
+                        key={index}
+                        goals={path}
+                        screenWidth={screenWidth}
+                      />
+                    ))}
+                  </>
+                </View>
+              )}
+            </>
           )}
         </View>
       </Host>

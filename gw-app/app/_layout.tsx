@@ -54,13 +54,6 @@ export default function RootLayout() {
   }, [loaded]);
 
   useEffect(() => {
-    (async () => {
-      const network = await Network.getIpAddressAsync();
-      console.log(network, "network");
-    })();
-  }, []);
-
-  useEffect(() => {
     if (!appData?.user || !dispatch || appData.socket?.connected) return;
 
     const socket = connectSocket(appData?.user?.uid);
