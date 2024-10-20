@@ -267,17 +267,15 @@ function GoalPathContainer({ goals }: { goals: Goal[] }) {
   return (
     <View style={{ flex: 1, flexDirection: "row" }}>
       {animatingGoals.length !== 0 &&
-        animatingGoals
-          .slice(0, 1)
-          .map((goal, index) => (
-            <GoalItem
-              key={goal.id}
-              goal={goal}
-              setFinishedGoal={setFinishedGoal}
-              setCanPushNew={setCanPushNew}
-              goalIndex={index}
-            />
-          ))}
+        animatingGoals.map((goal, index) => (
+          <GoalItem
+            key={goal.id}
+            goal={goal}
+            setFinishedGoal={setFinishedGoal}
+            setCanPushNew={setCanPushNew}
+            goalIndex={index}
+          />
+        ))}
     </View>
   );
 }

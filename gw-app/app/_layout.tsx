@@ -37,7 +37,7 @@ export default function RootLayout() {
   const [appData, dispatch] = useReducer(appDataReducer, {
     user: null,
     editingData: null,
-    api: url + ":3000" || "",
+    api: url,
     isLoading: false,
     sharedGoals: [],
     myGoals: [],

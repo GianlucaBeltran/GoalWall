@@ -154,6 +154,10 @@ function GoalPathContainer({
         setAnimatingGoals([]);
       }
     });
+
+    return () => {
+      document.removeEventListener("keydown", () => {});
+    };
   }, []);
 
   return (
@@ -256,11 +260,9 @@ function App() {
 
   const numberOfPaths = goals.length < 5 ? goals.length : 5;
   const goalsPerPath = goals.length / numberOfPaths;
-  console.log(goalsPerPath, "test", numberOfPaths);
   const paths = Array.from({ length: numberOfPaths }, (_, i) => {
     return goals.slice(i * goalsPerPath, (i + 1) * goalsPerPath);
   });
-  console.log(paths, goals.length % 5);
 
   return (
     <div className="App" ref={divContainerRef}>

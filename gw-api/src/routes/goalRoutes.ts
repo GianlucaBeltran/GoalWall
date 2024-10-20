@@ -220,7 +220,7 @@ goalRoutes.get("/sharedGoals/:id", async (req, res) => {
     goal.setAvatarFileName(goalAuthor.getAvatarFileName());
   }
 
-  console.log("Shared goals found ", unownedGoals);
+  console.log("Shared goals found ", unownedGoals.length);
 
   res.send({
     goals: unownedGoals,
