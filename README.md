@@ -25,7 +25,8 @@ Before running, ensure that [Node.js is installed](https://nodejs.org/en/downloa
 3. cd into gw-app: `cd gw-app`
 4. Run: `npm install` to download all the node packages
 5. Run: `npx expo start --no-dev --minify` (`--no-dev` and `--minify` flags are not needed but they ensure a better experience for the user using the app)
-6. The terminal should have printed a QR code, scan it with your phone camera, expo go should open and load the app
+6. TODOOOOOOOOOOO
+7. The terminal should have printed a QR code, scan it with your phone camera, expo go should open and load the app
 > **_NOTE:_** If the app crashes for some reason, or a red error message is displayed, you can press r in the terminal running expo go, to reload the app
 
 ### Running the screen (gw-screen)
