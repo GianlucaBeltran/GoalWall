@@ -1,7 +1,18 @@
 # GoalWall
 (DM2601) Repository for Group 16 prototype
 
+Oona Karppinen
+Zheng Yue
+Fatemeh Abdollahnazhad
+Filip Maras
+Gianluca Beltran
+
+
 https://github.com/user-attachments/assets/9340685d-fe2e-45a6-990c-8410febd382a
+
+https://github.com/user-attachments/assets/e501a3d3-bc61-4b56-ab23-af846a185b7f
+
+
 
 ## Figma
 
