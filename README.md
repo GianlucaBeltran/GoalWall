@@ -2,9 +2,13 @@
 (DM2601) Repository for Group 16 prototype
 
 Oona Karppinen
+
 Zheng Yue
+
 Fatemeh Abdollahnazhad
+
 Filip Maras
+
 Gianluca Beltran
 
 
