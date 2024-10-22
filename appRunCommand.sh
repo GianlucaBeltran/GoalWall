@@ -14,4 +14,4 @@ touch .env
 echo "EXPO_PUBLIC_HOME_API=http://$LOCAL_IP:3000" > .env
 
 echo "Starting app"
-npx expo start --no-dev --minify
+npx expo start
