@@ -9,7 +9,7 @@ import {
   TextInput,
   Keyboard,
 } from "react-native";
-
+import * as ScreenOrientation from "expo-screen-orientation";
 import ScreenView from "@/components/ScreenView";
 import ExclamationSVG from "@/components/svg/ExclamationSVG";
 import GoalSVG from "@/components/svg/GoalSVG";
@@ -68,6 +68,9 @@ export default function messages() {
     });
 
     (async () => {
+      await ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.PORTRAIT_UP
+      );
       try {
         const response = await fetch(
           appData.api + "/chat/" + appData.user?.uid,

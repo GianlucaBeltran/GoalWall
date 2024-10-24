@@ -297,9 +297,21 @@ export default function GoalWall() {
     >
       <Host>
         <View style={styles.container}>
-          <View style={{ margin: 20, marginLeft: 60, marginBottom: 5 }}>
+          <View
+            style={{
+              margin: 20,
+              marginLeft: 60,
+              marginBottom: 5,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 20,
+            }}
+          >
             <TouchableOpacity onPress={() => router.back()}>
               <ChevronLeftSVG />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.replace("/othersGoals")}>
+              <Text>See Goals List</Text>
             </TouchableOpacity>
           </View>
           {screenWidth && (

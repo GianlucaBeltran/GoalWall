@@ -9,7 +9,7 @@ import {
   TextInput,
   Keyboard,
 } from "react-native";
-
+import * as ScreenOrientation from "expo-screen-orientation";
 import ScreenView from "@/components/ScreenView";
 import ExclamationSVG from "@/components/svg/ExclamationSVG";
 import GoalSVG from "@/components/svg/GoalSVG";
@@ -64,6 +64,10 @@ export default function sharedGoals() {
     if (!appData || !dispatch) return;
 
     (async () => {
+      await ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.PORTRAIT_UP
+      );
+
       try {
         const response = await fetch(
           appData.api + "/goal/sharedGoals/" + appData.user?.uid,
@@ -87,6 +91,12 @@ export default function sharedGoals() {
         console.log(error, "error");
       }
     })();
+
+    // return () => {
+    //   ScreenOrientation.lockAsync(
+    //     ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT
+    //   );
+    // };
   }, []);
 
   useEffect(() => {

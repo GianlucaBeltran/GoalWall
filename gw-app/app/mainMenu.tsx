@@ -83,13 +83,13 @@ export default function mainMenu() {
             navigation: "/sharedGoals",
             svg: <ShareSVG />,
           },
-          {
-            id: "3",
-            header: "See other members' goals",
-            clickable: true,
-            navigation: "/othersGoals",
-            svg: <OthersSVG />,
-          },
+          // {
+          //   id: "3",
+          //   header: "See other members' goals",
+          //   clickable: true,
+          //   navigation: "/othersGoals",
+          //   svg: <OthersSVG />,
+          // },
         ]}
       />
     </ScreenView>
