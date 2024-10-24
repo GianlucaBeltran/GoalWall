@@ -1,6 +1,27 @@
 # GoalWall
 (DM2601) Repository for Group 16 prototype
 
+Oona Karppinen
+
+Zheng Yue
+
+Fatemeh Abdollahnazhad
+
+Filip Maras
+
+Gianluca Beltran
+
+
+https://github.com/user-attachments/assets/9340685d-fe2e-45a6-990c-8410febd382a
+
+https://github.com/user-attachments/assets/e501a3d3-bc61-4b56-ab23-af846a185b7f
+
+
+
+## Figma
+
+If you have any trouble setting up the project locally, here is the [interactive figma of our app](https://www.figma.com/proto/Z5SXOFlx63xZpssat342Jn/Media-Technology?page-id=504%3A1585&node-id=504-1678&node-type=canvas&viewport=572%2C688%2C0.26&t=o6S7FVwMlo0Jcu7q-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=504%3A1678) and [figma of the screen](https://www.figma.com/proto/Z5SXOFlx63xZpssat342Jn/Media-Technology?page-id=0%3A1&node-id=91-117&node-type=frame&viewport=-48%2C60%2C0.06&t=Fh2HSxamGc1WGtRz-1&scaling=contain&content-scaling=fixed&starting-point-node-id=110%3A931)
+
 ## Running locally
 
 These instructions are made with mac in mind as stated in the assigment instructions.
